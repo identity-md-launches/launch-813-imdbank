@@ -1,0 +1,41 @@
+{
+  "address": "0xD34a99Bc0f67aE1bbd63C660e6d0b0dd03E263B7",
+  "block": "0x18ec5fc",
+  "endpoint": "https://rpc.flashbots.net",
+  "retrieved_at_utc": "2026-10-06T14:47:10.352455+00:00",
+  "chainId": {
+    "jsonrpc": "2.0",
+    "result": "0x1",
+    "id": 1
+  },
+  "reads": {
+    "name": {
+      "transport_error": "HTTP Error 403: Forbidden"
+    },
+    "symbol": {
+      "transport_error": "HTTP Error 403: Forbidden"
+    },
+    "decimals": {
+      "transport_error": "HTTP Error 403: Forbidden"
+    },
+    "totalSupply": {
+      "transport_error": "HTTP Error 403: Forbidden"
+    },
+    "owner": {
+      "transport_error": "HTTP Error 403: Forbidden"
+    },
+    "paused": {
+      "transport_error": "HTTP Error 403: Forbidden"
+    }
+  },
+  "code": {
+    "transport_error": "HTTP Error 504: Gateway Time-out"
+  },
+  "code_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "implementation": {
+    "transport_error": "HTTP Error 504: Gateway Time-out"
+  },
+  "admin": {
+    "transport_error": "HTTP Error 504: Gateway Time-out"
+  }
+}

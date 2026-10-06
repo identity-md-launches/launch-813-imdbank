@@ -1,0 +1,108 @@
+{
+  "block": "0x18ec5fc",
+  "retrieved_at_utc": "2026-10-06T14:50:04.625882+00:00",
+  "endpoint": "https://eth.blockrazor.xyz",
+  "owner": "0x047F606fD5b2BaA5f5C6c4aB8958E45CB6B054B7",
+  "owner_code": {
+    "jsonrpc": "2.0",
+    "id": 1,
+    "result": "0x"
+  },
+  "layerzero_endpoint": {
+    "jsonrpc": "2.0",
+    "id": 1,
+    "result": "0x0000000000000000000000001a44076050125825900e736c501f859c50fe728c"
+  },
+  "holders": [
+    {
+      "address": "0x9Efa934D9fAd4AE28c998a40195646b965a97247",
+      "blockscout_value": "1751170839110946471579962",
+      "onchain": {
+        "jsonrpc": "2.0",
+        "id": 1,
+        "result": "0x0000000000000000000000000000000000000000000172d3295206a8a45c913a"
+      }
+    },
+    {
+      "address": "0x000000000004444c5dc75cB358380D2e3dE08A90",
+      "blockscout_value": "186399617581154944969544",
+      "onchain": {
+        "jsonrpc": "2.0",
+        "id": 1,
+        "result": "0x00000000000000000000000000000000000000000000277549dfc544d00561ee"
+      }
+    },
+    {
+      "address": "0xE54d6571aCa515614927F3A70B8957c2B511603C",
+      "blockscout_value": "68752655940219717918363",
+      "onchain": {
+        "jsonrpc": "2.0",
+        "id": 1,
+        "result": "0x000000000000000000000000000000000000000000000e8f16c53672666d9e9b"
+      }
+    },
+    {
+      "address": "0x773D715200aB5c07F39dB9772E3c83C48534a585",
+      "blockscout_value": "59934983807644214270121",
+      "onchain": {
+        "jsonrpc": "2.0",
+        "id": 1,
+        "result": "0x000000000000000000000000000000000000000000000cb114fccfe60e6c98a9"
+      }
+    },
+    {
+      "address": "0xE9fc469890e3407Dfeab03aCe430e7af39Ca8225",
+      "blockscout_value": "50232478172339017925714",
+      "onchain": {
+        "jsonrpc": "2.0",
+        "id": 1,
+        "result": "0x000000000000000000000000000000000000000000000aa31bac52aaa674c452"
+      }
+    },
+    {
+      "address": "0x62ECc369f62C2B9791FE758b37709Faa1513F72e",
+      "blockscout_value": "50145947336855086339069",
+      "onchain": {
+        "jsonrpc": "2.0",
+        "id": 1,
+        "result": "0x000000000000000000000000000000000000000000000a9e6ad10a4104f293fd"
+      }
+    },
+    {
+      "address": "0x4CDC19e2aa403CBBd391359439E187196D26624c",
+      "blockscout_value": "45077510634059694641577",
+      "onchain": {
+        "jsonrpc": "2.0",
+        "id": 1,
+        "result": "0x00000000000000000000000000000000000000000000098ba820a2ca458491a9"
+      }
+    },
+    {
+      "address": "0x4AdbfDee6188df8a24EAeEE87c9BdEBD4dD3fb64",
+      "blockscout_value": "38800778127095829021824",
+      "onchain": {
+        "jsonrpc": "2.0",
+        "id": 1,
+        "result": "0x00000000000000000000000000000000000000000000083764f73342b53ec480"
+      }
+    },
+    {
+      "address": "0x2888BE6982957103EA88Ac10f4179dF0A294e877",
+      "blockscout_value": "35000000000000000000000",
+      "onchain": {
+        "jsonrpc": "2.0",
+        "id": 1,
+        "result": "0x0000000000000000000000000000000000000000000007695a92c20d6fe00000"
+      }
+    },
+    {
+      "address": "0xA227A71E217173DE3Edcbfb66607e3ef283e4A82",
+      "blockscout_value": "32375266004503424690496",
+      "onchain": {
+        "jsonrpc": "2.0",
+        "id": 1,
+        "result": "0x0000000000000000000000000000000000000000000006db11126395c6c46940"
+      }
+    }
+  ]
+}

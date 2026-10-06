@@ -1,0 +1,41 @@
+{
+  "reviewed_at_utc": "2026-10-06T15:08:09.593420+00:00",
+  "compiler": "0.8.26",
+  "build": "forge build passed with heuristic lint warnings triaged in SECURITY_REVIEW.md",
+  "default_tests": {
+    "command": "forge test",
+    "passed": 47,
+    "failed": 0,
+    "skipped": 0,
+    "fuzz_runs": 512,
+    "invariant_runs": 128,
+    "invariant_calls": 8192
+  },
+  "independent_tests": {
+    "command": "forge test --match-contract IndependentAuditTest -vv",
+    "passed": 9,
+    "failed": 0
+  },
+  "bytecode_policy": "python3 tools/check_bytecode.py passed for all three application contracts",
+  "static_analyzers": {
+    "slither": "not available, not run",
+    "mythril": "not available, not run"
+  },
+  "runtime_templates": {
+    "IMDBank": {
+      "bytes": 12360,
+      "sha256_binary": "2bba0bf5fafe15c51e3622468fcc5b5feb2d0878648d069f393d2a4bb6ff1e46",
+      "note": "Compiler artifact runtime template; immutable constructor values are placeholders. This is not a deployed onchain code hash."
+    },
+    "RiskOracle": {
+      "bytes": 4266,
+      "sha256_binary": "fe219a52110a459cd8a534c794f465b7c3a488bb192a70e5a3e263e67138c4c1",
+      "note": "Compiler artifact runtime template; immutable constructor values are placeholders. This is not a deployed onchain code hash."
+    },
+    "GovernanceTimelock": {
+      "bytes": 1934,
+      "sha256_binary": "3929a1e5dc3d67836790343d2e824cac2d6a66d191b80a757000a7161594a3df",
+      "note": "Compiler artifact runtime template; immutable constructor values are placeholders. This is not a deployed onchain code hash."
+    }
+  }
+}

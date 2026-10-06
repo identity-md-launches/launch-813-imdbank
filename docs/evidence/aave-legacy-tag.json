@@ -1,0 +1,14 @@
+{
+  "url": "https://api.github.com/repos/aave/aave-v3-core/git/ref/tags/v1.19.4",
+  "retrieved_at_utc": "2026-10-06T14:48:13.810771+00:00",
+  "response": {
+    "ref": "refs/tags/v1.19.4",
+    "node_id": "MDM6UmVmMzg5OTEzMzk4OnJlZnMvdGFncy92MS4xOS40",
+    "url": "https://api.github.com/repos/aave/aave-v3-core/git/refs/tags/v1.19.4",
+    "object": {
+      "sha": "b74526a7bc67a3a117a1963fc871b3eb8cea8435",
+      "type": "commit",
+      "url": "https://api.github.com/repos/aave/aave-v3-core/git/commits/b74526a7bc67a3a117a1963fc871b3eb8cea8435"
+    }
+  }
+}

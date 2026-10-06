@@ -1,0 +1,8 @@
+{
+  "status": "RPC_HISTORY_UNAVAILABLE",
+  "original_block": 26134012,
+  "upstream": "https://eth.blockrazor.xyz",
+  "error": "historical state 7a897688b23274ad3573270eb02d7cb39d26084e8fa7b0bb815d929c9e7895bb is not available",
+  "scope": "A later frontend replay on the original fork could not retrieve newly requested account/storage state. Earlier successful results remain historical records, not a promise of public archive availability.",
+  "resolution": "Final frontend replay passed at newly pinned block 26134156. Durable historical replay needs an archival RPC provider."
+}

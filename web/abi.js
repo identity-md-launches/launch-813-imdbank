@@ -1,0 +1,33 @@
+export const bankAbi = [
+  ...['Unauthorized','InvalidConfiguration','UnsupportedAsset','InvalidAmount','InvalidRecipient','Reentrancy','Frozen','CapExceeded','InsufficientLiquidity','UnsafePosition','HealthyPosition','InvalidPrice','Dust','Expired','Slippage','OutstandingBadDebt'].map(name => `error ${name}()`),
+  'function name() view returns (string)', 'function symbol() view returns (string)',
+  'function feeBps() view returns (uint256)',
+  'function collateral() view returns (address)', 'function oracle() view returns (address)',
+  'function governor() view returns (address)', 'function guardian() view returns (address)',
+  'function assets(uint256) view returns (address)',
+  'function ltvBps() view returns (uint256)', 'function liquidationThresholdBps() view returns (uint256)',
+  'function liquidationBonusBps() view returns (uint256)', 'function closeFactorBps() view returns (uint256)',
+  'function supplyCap() view returns (uint256)', 'function frozen() view returns (bool)',
+  'function collateralUnit() view returns (uint256)', 'function assetUnit(address) view returns (uint256)',
+  'function finalizeDust(address account)',
+  'function collateralBalance(address) view returns (uint256)',
+  'function collateralEnabled(address) view returns (bool)',
+  'function accountData(address) view returns (uint256 collateralUsd,uint256 debtUsd,uint256 borrowCapacityUsd,uint256 liquidationThresholdUsd,uint256 healthFactor)',
+  'function previewDebt(address,address) view returns (uint256)',
+  'function reserveData(address) view returns (uint256 cash,uint256 totalDebt,uint256 index,uint256 rateRay,uint256 cap,uint256 badDebt,bool frozen)',
+  'function supply(uint256 amount,address onBehalfOf)',
+  'function setCollateralEnabled(bool enabled)',
+  'function withdraw(uint256 amount,address to)',
+  'function borrow(address asset,uint256 amount,address to)',
+  'function repay(address asset,uint256 maxAmount,address onBehalfOf) returns (uint256 paid)',
+  'function liquidate(address account,address asset,uint256 maxRepay,uint256 minCollateralOut,uint256 deadline) returns (uint256 repaid,uint256 seized)',
+  'function previewLiquidation(address account,address asset,uint256 maxRepay) view returns (uint256 repaid,uint256 seized)',
+  'function donateLiquidity(address asset,uint256 amount)', 'function accrue(address asset)',
+];
+export const tokenAbi = [
+  'function balanceOf(address) view returns (uint256)',
+  'function allowance(address,address) view returns (uint256)',
+  'function approve(address,uint256) returns (bool)',
+  'function decimals() view returns (uint8)', 'function symbol() view returns (string)',
+];
+export const oracleAbi = ['function price(address) view returns (uint256)'];

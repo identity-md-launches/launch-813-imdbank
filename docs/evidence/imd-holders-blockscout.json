@@ -1,0 +1,264 @@
+{
+  "url": "https://eth.blockscout.com/api/v2/tokens/0xD34a99Bc0f67aE1bbd63C660e6d0b0dd03E263B7/holders",
+  "retrieved_at_utc": "2026-10-06T14:48:13.811512+00:00",
+  "response": {
+    "items": [
+      {
+        "address": "0x9Efa934D9fAd4AE28c998a40195646b965a97247",
+        "name": "StakedIMD",
+        "value": "1751170839110946471579962"
+      },
+      {
+        "address": "0x000000000004444c5dc75cB358380D2e3dE08A90",
+        "name": "PoolManager",
+        "value": "186399617581154944969544"
+      },
+      {
+        "address": "0xE54d6571aCa515614927F3A70B8957c2B511603C",
+        "name": null,
+        "value": "68752655940219717918363"
+      },
+      {
+        "address": "0x773D715200aB5c07F39dB9772E3c83C48534a585",
+        "name": null,
+        "value": "59934983807644214270121"
+      },
+      {
+        "address": "0xE9fc469890e3407Dfeab03aCe430e7af39Ca8225",
+        "name": null,
+        "value": "50232478172339017925714"
+      },
+      {
+        "address": "0x62ECc369f62C2B9791FE758b37709Faa1513F72e",
+        "name": null,
+        "value": "50145947336855086339069"
+      },
+      {
+        "address": "0x4CDC19e2aa403CBBd391359439E187196D26624c",
+        "name": null,
+        "value": "45077510634059694641577"
+      },
+      {
+        "address": "0x4AdbfDee6188df8a24EAeEE87c9BdEBD4dD3fb64",
+        "name": null,
+        "value": "38800778127095829021824"
+      },
+      {
+        "address": "0x2888BE6982957103EA88Ac10f4179dF0A294e877",
+        "name": null,
+        "value": "35000000000000000000000"
+      },
+      {
+        "address": "0xA227A71E217173DE3Edcbfb66607e3ef283e4A82",
+        "name": null,
+        "value": "32375266004503424690496"
+      },
+      {
+        "address": "0x894D4e6d3d2Abc64Fc0de0e4e2Ea63A93BC9c520",
+        "name": "UniswapV3Pool",
+        "value": "30512587818324914509834"
+      },
+      {
+        "address": "0x747b3b1aA0cC5ce1e7685456FCce378aC9d35B29",
+        "name": null,
+        "value": "30253298917886159869542"
+      },
+      {
+        "address": "0x131bb0a3DEFA4DEe1861c8d3fC486F61c769D7B3",
+        "name": null,
+        "value": "28599842975838731790534"
+      },
+      {
+        "address": "0x63b9A33525EBBFC765aC9C81e852c57bFf0A2CEF",
+        "name": null,
+        "value": "26088332706729406957648"
+      },
+      {
+        "address": "0xCE64F170a75eb30c6E33e39A44cc0d5E8BA888c6",
+        "name": null,
+        "value": "25000176628000000000000"
+      },
+      {
+        "address": "0xb28D1b5ABBf6E1FC6130c8E05B72829ACA5e462B",
+        "name": null,
+        "value": "24727837595136366250604"
+      },
+      {
+        "address": "0x39B337121494b10CFfe3E581ab3281b2d62C5b08",
+        "name": null,
+        "value": "23874291284361698453110"
+      },
+      {
+        "address": "0x2D89671B6A79B9B542CfeB289bF0Ad52F7bE3676",
+        "name": null,
+        "value": "22301052172256691056413"
+      },
+      {
+        "address": "0x1605B59DfE3C1742C815D604aAB6A2fAa3a5C91F",
+        "name": null,
+        "value": "21685133017037905243775"
+      },
+      {
+        "address": "0x595aAF06b5714f7c1767a85cb5E90D9d97428E28",
+        "name": null,
+        "value": "21614518473617989417841"
+      },
+      {
+        "address": "0xC7eCA250daa91BBf85111DAF7f228502B87A6907",
+        "name": null,
+        "value": "21232178038986753438046"
+      },
+      {
+        "address": "0x8F86B823CD79b0cBc328e18B1Cc0c66CC1B583F5",
+        "name": null,
+        "value": "19975289550537337773257"
+      },
+      {
+        "address": "0x5ca1A696fC2b600bD9aDc236Ce2736AC2e0fD2FB",
+        "name": null,
+        "value": "17713899252390860344454"
+      },
+      {
+        "address": "0x2C10c78fDE5837C1beFa6e6e6c6633CD0F1bDA05",
+        "name": null,
+        "value": "17542967545962846517690"
+      },
+      {
+        "address": "0x9955B74506cE384d7F942B5f33dd826E8F79bEe0",
+        "name": null,
+        "value": "17381766213398496545029"
+      },
+      {
+        "address": "0x84434127eeA6dA0f5393D61315b9003C1f31Eb92",
+        "name": null,
+        "value": "17000194422272284427036"
+      },
+      {
+        "address": "0x7A28dBb2e71b4eb7eD47dcfAA0B689Fc6c3283aE",
+        "name": null,
+        "value": "16214759903058650467928"
+      },
+      {
+        "address": "0x23ad4067aF541ee28c7f5c69Eff348139Beb7BD8",
+        "name": null,
+        "value": "16031932492444111709117"
+      },
+      {
+        "address": "0xA6e2Dc44418F5ad213C86db4dbB203A59d13C49F",
+        "name": null,
+        "value": "15492763923757856547704"
+      },
+      {
+        "address": "0xfa6A49089faDB3Da6e79972254d5B43c590F96e3",
+        "name": null,
+        "value": "13992198001901010224660"
+      },
+      {
+        "address": "0x69326E48f68500fb6cf3b3a7da640737B9cC347b",
+        "name": null,
+        "value": "12821609251390188130498"
+      },
+      {
+        "address": "0xe4Ffc3149bF7f4053402d969C81f286a0e9A8695",
+        "name": null,
+        "value": "12700944385866104598998"
+      },
+      {
+        "address": "0x7B7F82e40f1Fe2A4695625F7D776E83210d549c1",
+        "name": null,
+        "value": "12500291943040365559017"
+      },
+      {
+        "address": "0x071aDCB6Ab4527Eeb2B17297E8A7529513C37141",
+        "name": null,
+        "value": "12404439611294681207732"
+      },
+      {
+        "address": "0xcE512D573bABC6188F90f0ba4c118D942B2206d1",
+        "name": null,
+        "value": "12000000000000000000000"
+      },
+      {
+        "address": "0x67c1d5b0b3361CaA32b31A2D9f1b9d299E69A08c",
+        "name": null,
+        "value": "12000000000000000000000"
+      },
+      {
+        "address": "0x566dc593a1B15d5fdD8EF2a04F2c9acF3B0749B4",
+        "name": null,
+        "value": "11756189999550867098474"
+      },
+      {
+        "address": "0x9b3099Bccd6cf13753387b0879d3c317Fbc08e48",
+        "name": null,
+        "value": "11487568149252219934783"
+      },
+      {
+        "address": "0x274a38D48225256add28fb78C5e22dF1fCACCeD7",
+        "name": null,
+        "value": "11466523481726775000579"
+      },
+      {
+        "address": "0xf102D9372E410E7498E4079599733b80351aff29",
+        "name": null,
+        "value": "11446926495570641378686"
+      },
+      {
+        "address": "0x4e30736ecf9B824f9F183f7F68326a828af0BFA7",
+        "name": null,
+        "value": "11367456174354512168532"
+      },
+      {
+        "address": "0xeafCb3d7128c81A948F9784529168127a7392d25",
+        "name": null,
+        "value": "11071060844036716108740"
+      },
+      {
+        "address": "0xCE925af5293C66c7C2C14A851aAAee34DdAA9319",
+        "name": null,
+        "value": "10890688646953347455408"
+      },
+      {
+        "address": "0xfB0404F51e1803d959BcBbD1c0D0CAad2918afe6",
+        "name": null,
+        "value": "10698779289101843124920"
+      },
+      {
+        "address": "0x7F6e4E1e59be05dc717C8e5429154A7408609Ee2",
+        "name": null,
+        "value": "10659463241909068569119"
+      },
+      {
+        "address": "0x4f214020736784fA37BC35D970d4cFA7348EDC2f",
+        "name": null,
+        "value": "10062520094985243026835"
+      },
+      {
+        "address": "0x06e04B685Cc4AB3f5DDABc0c49E818A91311A904",
+        "name": null,
+        "value": "10033065333621072224771"
+      },
+      {
+        "address": "0xf29B2EbE4020ceECFd6e01C057684f6e9510f881",
+        "name": null,
+        "value": "10023626079850386942250"
+      },
+      {
+        "address": "0x65c9874A0107c5553c92430a7AA3863a79D543fD",
+        "name": null,
+        "value": "10012853431169938949765"
+      },
+      {
+        "address": "0xC0E282b5284A728698f4e1Da0ba34fF308E1e82B",
+        "name": null,
+        "value": "9850001135169649161370"
+      }
+    ],
+    "next_page_params": {
+      "value": "9850001135169649161370",
+      "address_hash": "0xc0e282b5284a728698f4e1da0ba34ff308e1e82b",
+      "items_count": 50
+    }
+  },
+  "note": "First page only, current indexer snapshot. Top ten selected addresses later checked onchain at pinned block; page is not a same-block ranking or beneficial-owner analysis."
+}

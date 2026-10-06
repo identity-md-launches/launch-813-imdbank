@@ -1,0 +1,20 @@
+{
+  "endpoint": "https://rpc.flashbots.net",
+  "retrieved_at_utc": "2026-10-06T14:46:43.315916+00:00",
+  "response": {
+    "jsonrpc": "2.0",
+    "result": {
+      "number": "0x18ec5fc",
+      "hash": "0x4c88763379e950dc0c749b6e9f12501f2195d4bbdef406545a1c5f9ffd0ca108",
+      "parentHash": "0x9ad7f4aab7938e251ace58b67016d351f20880968a68874979548475894a8dc7",
+      "timestamp": "0x6ac5095f",
+      "stateRoot": "0x7a897688b23274ad3573270eb02d7cb39d26084e8fa7b0bb815d929c9e7895bb",
+      "receiptsRoot": "0x2d43f6625bf2f2dbaaccb391091d176bf55336491f32883931c5407945daa902",
+      "transactionsRoot": "0x25734db8c572f24771f698604a32379bd853c1fa412c5bd4f05768c24f92df7a",
+      "gasLimit": "0x3938700",
+      "gasUsed": "0x2ed55ef"
+    },
+    "id": 1
+  },
+  "omitted": "Transaction hash list and logsBloom omitted"
+}

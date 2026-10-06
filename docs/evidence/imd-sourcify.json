@@ -1,0 +1,269 @@
+{
+  "url": "https://sourcify.dev/server/v2/contract/1/0xD34a99Bc0f67aE1bbd63C660e6d0b0dd03E263B7?fields=all",
+  "retrieved_at_utc": "2026-10-06T14:46:23.887365+00:00",
+  "status": 200,
+  "body_sha256": "e17e290e25ab659ede9466a636e19fbf0df58f3e19d5707ed9d5f2bb1b8a948f",
+  "note": "Source response inspected in full; code not vendored because primary BridgedFP SPDX is UNLICENSED. Source hashes and runtime verification retained.",
+  "matchId": "27277375",
+  "creationMatch": "exact_match",
+  "runtimeMatch": "exact_match",
+  "verifiedAt": "2026-03-28T05:43:41Z",
+  "compilation": {
+    "language": "Solidity",
+    "compiler": "solc",
+    "compilerVersion": "0.8.26+commit.8a97fa7a",
+    "compilerSettings": {
+      "viaIR": false,
+      "metadata": {
+        "appendCBOR": true,
+        "bytecodeHash": "ipfs",
+        "useLiteralContent": false
+      },
+      "optimizer": {
+        "runs": 200,
+        "enabled": false
+      },
+      "evmVersion": "cancun",
+      "remappings": [
+        "forge-std/=lib/forge-std/src/",
+        "@layerzerolabs/oft-evm/=lib/devtools/packages/oft-evm/",
+        "@openzeppelin/=lib/openzeppelin-contracts/",
+        "@layerzerolabs/oapp-evm/=lib/devtools/packages/oapp-evm/",
+        "@layerzerolabs/lz-evm-protocol-v2/=lib/LayerZero-v2/packages/layerzero-v2/evm/protocol/",
+        "@layerzerolabs/lz-evm-messagelib-v2/=lib/LayerZero-v2/packages/layerzero-v2/evm/messagelib/",
+        "solidity-bytes-utils/=lib/solidity-bytes-utils/",
+        "LayerZero-v2/=lib/LayerZero-v2/",
+        "devtools/=lib/devtools/packages/toolbox-foundry/src/",
+        "ds-test/=lib/LayerZero-v2/lib/forge-std/lib/ds-test/src/",
+        "erc4626-tests/=lib/openzeppelin-contracts/lib/erc4626-tests/",
+        "halmos-cheatcodes/=lib/openzeppelin-contracts/lib/halmos-cheatcodes/src/",
+        "openzeppelin-contracts/=lib/openzeppelin-contracts/"
+      ]
+    },
+    "name": "BridgedFP",
+    "fullyQualifiedName": "src/BridgedFP.sol:BridgedFP"
+  },
+  "deployment": {
+    "transactionHash": "0xb2e2587f18b440f2c492d911566cb979d4ec477dd69824d9ac17bdae2608704b",
+    "blockNumber": "23501863",
+    "transactionIndex": "95",
+    "deployer": "0x047F606fD5b2BaA5f5C6c4aB8958E45CB6B054B7"
+  },
+  "sources": {
+    "src/BridgedFP.sol": {
+      "sha256": "30cf0a98d8e56a63036b672f810e34e32ddb6335e4f2c03ec79713b3cd8931ad",
+      "license": "// SPDX-License-Identifier: UNLICENSED"
+    },
+    "lib/openzeppelin-contracts/contracts/access/Ownable.sol": {
+      "sha256": "38578bd71c0a909840e67202db527cc6b4e6b437e0f39f0c909da32c1e30cb81",
+      "license": "// SPDX-License-Identifier: MIT"
+    },
+    "lib/devtools/packages/oft-evm/contracts/OFT.sol": {
+      "sha256": "6f7e6b7d514cd2be4e6e5fa0827706289882a62c496786c9c08d5560e1c52415",
+      "license": "// SPDX-License-Identifier: MIT"
+    },
+    "lib/openzeppelin-contracts/contracts/utils/Context.sol": {
+      "sha256": "847fda5460fee70f56f4200f59b82ae622bb03c79c77e67af010e31b7e2cc5b6",
+      "license": "// SPDX-License-Identifier: MIT"
+    },
+    "lib/openzeppelin-contracts/contracts/token/ERC20/ERC20.sol": {
+      "sha256": "9f906af4cba6e7e091dc12d45e6687e1239cf82d17678198424250fd64ab96bd",
+      "license": "// SPDX-License-Identifier: MIT"
+    },
+    "lib/devtools/packages/oft-evm/contracts/OFTCore.sol": {
+      "sha256": "9e8788bbc3487cc8848504f11a1ed5995384372e18c0a7fa4858865854b5cc1c",
+      "license": "// SPDX-License-Identifier: MIT"
+    },
+    "lib/openzeppelin-contracts/contracts/token/ERC20/IERC20.sol": {
+      "sha256": "01b6f5c4fa45fd38822b286ecef6daf983d27306dd6362496fa71b3e4600b72c",
+      "license": "// SPDX-License-Identifier: MIT"
+    },
+    "lib/openzeppelin-contracts/contracts/token/ERC20/extensions/IERC20Metadata.sol": {
+      "sha256": "0b7132f17d14d1d84b41b0bb429be62dafdff00fd3470f68724d8018eb07f57a",
+      "license": "// SPDX-License-Identifier: MIT"
+    },
+    "lib/openzeppelin-contracts/contracts/interfaces/draft-IERC6093.sol": {
+      "sha256": "df936240c9a5d342582cbda70dd773b1c1d0e0dda3042b1c17b902ef0c36827b",
+      "license": "// SPDX-License-Identifier: MIT"
+    },
+    "lib/devtools/packages/oapp-evm/contracts/oapp/OApp.sol": {
+      "sha256": "92b191c937374b6e76686245b7b98eb3bc0bfacff4d54b279b7ecf1321878e04",
+      "license": "// SPDX-License-Identifier: MIT"
+    },
+    "lib/devtools/packages/oapp-evm/contracts/oapp/libs/OAppOptionsType3.sol": {
+      "sha256": "7414ab6a173705ac741772684d2bda00a0ed044c5e9faa3339a2dfe10ec867f3",
+      "license": "// SPDX-License-Identifier: MIT"
+    },
+    "lib/devtools/packages/oapp-evm/contracts/oapp/interfaces/IOAppMsgInspector.sol": {
+      "sha256": "5bb1fd1038c648bff4e9c7b88f322c5cde41d355f03090ad1ec46f6712f09c4e",
+      "license": "// SPDX-License-Identifier: MIT"
+    },
+    "lib/devtools/packages/oapp-evm/contracts/precrime/OAppPreCrimeSimulator.sol": {
+      "sha256": "b0fcd1e2da22197e21ff13a350ac9d0a7f7e5e8bb1528c5d9860a3b820f555f9",
+      "license": "// SPDX-License-Identifier: MIT"
+    },
+    "lib/devtools/packages/oft-evm/contracts/interfaces/IOFT.sol": {
+      "sha256": "826e606e5ec4a8a22fb5d4876ddc1b0e3c50d6c8da9da96cb88cbd38877379fa",
+      "license": "// SPDX-License-Identifier: MIT"
+    },
+    "lib/devtools/packages/oft-evm/contracts/libs/OFTMsgCodec.sol": {
+      "sha256": "3e6dfff6595f8af1c1618a80e30efd16f117652e1fd73ffb1f6795dcc443d658",
+      "license": "// SPDX-License-Identifier: MIT"
+    },
+    "lib/devtools/packages/oft-evm/contracts/libs/OFTComposeMsgCodec.sol": {
+      "sha256": "c1fe5b84aa7fdc9b5480174db9d46baa241edc7a1cc63a93a827e16b7dc21fc8",
+      "license": "// SPDX-License-Identifier: MIT"
+    },
+    "lib/devtools/packages/oapp-evm/contracts/oapp/OAppSender.sol": {
+      "sha256": "276f5d551ae7e478fb0c56002acf5476e628748c1f5ba0d63ea051e93813a137",
+      "license": "// SPDX-License-Identifier: MIT"
+    },
+    "lib/devtools/packages/oapp-evm/contracts/oapp/OAppReceiver.sol": {
+      "sha256": "8d1dd4a6a74c3d9704a078e6404dcf7aab688b750ea64e8331f873e253862bc0",
+      "license": "// SPDX-License-Identifier: MIT"
+    },
+    "lib/devtools/packages/oapp-evm/contracts/oapp/OAppCore.sol": {
+      "sha256": "b0a3e30618f5d4c71732a2048d7c2928be399508d6ec622c9345915c92b3dd0a",
+      "license": "// SPDX-License-Identifier: MIT"
+    },
+    "lib/devtools/packages/oapp-evm/contracts/oapp/interfaces/IOAppOptionsType3.sol": {
+      "sha256": "c14d4f013045452583eae3baf14743e0628e24c146c3beea5a10b992b1171756",
+      "license": "// SPDX-License-Identifier: MIT"
+    },
+    "lib/devtools/packages/oapp-evm/contracts/precrime/interfaces/IPreCrime.sol": {
+      "sha256": "25a8f3b9257ed4f65fca276f7631cca3ead87c2f17c837e6eee90c8835433380",
+      "license": "// SPDX-License-Identifier: MIT"
+    },
+    "lib/devtools/packages/oapp-evm/contracts/precrime/interfaces/IOAppPreCrimeSimulator.sol": {
+      "sha256": "2db19c9641e81e5366c268c40506db56ee5434b5c874cffe02fb1e18034a9285",
+      "license": "// SPDX-License-Identifier: MIT"
+    },
+    "lib/openzeppelin-contracts/contracts/token/ERC20/utils/SafeERC20.sol": {
+      "sha256": "ac1fd9fa99b194a8db8dfa9ae8e3ff44feaa8f16668241fd2b66ae8b47d7c082",
+      "license": "// SPDX-License-Identifier: MIT"
+    },
+    "lib/LayerZero-v2/packages/layerzero-v2/evm/protocol/contracts/interfaces/ILayerZeroEndpointV2.sol": {
+      "sha256": "a88fb702b371527c3791d7e5c168c1157d39021ed29b51e627e02973e6a740e0",
+      "license": "// SPDX-License-Identifier: MIT"
+    },
+    "lib/devtools/packages/oapp-evm/contracts/oapp/interfaces/IOAppReceiver.sol": {
+      "sha256": "da4aff9322961c648e2221f7df203a44b375a397f2548b74679b3e9d0ae9addd",
+      "license": "// SPDX-License-Identifier: MIT"
+    },
+    "lib/devtools/packages/oapp-evm/contracts/oapp/interfaces/IOAppCore.sol": {
+      "sha256": "041dd35f0a4a22425614414c05cd5aae6ce7e4b5b86b0350045e57c0ed3cbf1b",
+      "license": "// SPDX-License-Identifier: MIT"
+    },
+    "lib/devtools/packages/oapp-evm/contracts/precrime/libs/Packet.sol": {
+      "sha256": "b95b1e7f7470306f41da606d0984b9384d2134fc19ee814d7d9f98c613836745",
+      "license": "// SPDX-License-Identifier: MIT"
+    },
+    "lib/openzeppelin-contracts/contracts/interfaces/IERC1363.sol": {
+      "sha256": "9c3a75a925a6dac9e88b03cddc58d42fe3131b0aaaad84408521f3f7af2f991b",
+      "license": "// SPDX-License-Identifier: MIT"
+    },
+    "lib/LayerZero-v2/packages/layerzero-v2/evm/protocol/contracts/interfaces/IMessageLibManager.sol": {
+      "sha256": "c648091e7cb079cb95778becfff1a813e901fdc07124153ba731a7d9daa29b40",
+      "license": "// SPDX-License-Identifier: MIT"
+    },
+    "lib/LayerZero-v2/packages/layerzero-v2/evm/protocol/contracts/interfaces/IMessagingComposer.sol": {
+      "sha256": "5e7e5a47a477dcf05c034d5135bf6516119af881ea78d586805eee0ad5ab6b12",
+      "license": "// SPDX-License-Identifier: MIT"
+    },
+    "lib/LayerZero-v2/packages/layerzero-v2/evm/protocol/contracts/interfaces/IMessagingChannel.sol": {
+      "sha256": "9d0100f7cede83d5a4f6c9e03d6bfd24f861e9331b298ca4c73f99b161c718d5",
+      "license": "// SPDX-License-Identifier: MIT"
+    },
+    "lib/LayerZero-v2/packages/layerzero-v2/evm/protocol/contracts/interfaces/IMessagingContext.sol": {
+      "sha256": "b7f081828b8d0d206833953ebd73101bb28ac62541e7e8365fddc38eb440a92a",
+      "license": "// SPDX-License-Identifier: MIT"
+    },
+    "lib/LayerZero-v2/packages/layerzero-v2/evm/protocol/contracts/interfaces/ILayerZeroReceiver.sol": {
+      "sha256": "24e4add7dd95a72dad23e26c4fadfc1b6ce63148e0c7f4d6ad5dfaeda79db3e7",
+      "license": "// SPDX-License-Identifier: MIT"
+    },
+    "lib/LayerZero-v2/packages/layerzero-v2/evm/protocol/contracts/messagelib/libs/PacketV1Codec.sol": {
+      "sha256": "ed105f6e0e1ac7ef92b582e30d0d55d260cdcd6ca63057cd866f4c019c069b44",
+      "license": "// SPDX-License-Identifier: LZBL-1.2"
+    },
+    "lib/openzeppelin-contracts/contracts/interfaces/IERC20.sol": {
+      "sha256": "0158e2d3e0e28bedd99eec13dcf1a8aa3a70a5b7e4bb2ad709609c95fcc740d1",
+      "license": "// SPDX-License-Identifier: MIT"
+    },
+    "lib/openzeppelin-contracts/contracts/interfaces/IERC165.sol": {
+      "sha256": "dfb3f56fa928a7c6cae41a7ce2c86b9210fa18d33fa26389099d66a0fa790368",
+      "license": "// SPDX-License-Identifier: MIT"
+    },
+    "lib/LayerZero-v2/packages/layerzero-v2/evm/protocol/contracts/interfaces/ISendLib.sol": {
+      "sha256": "816acb88e015f130be9811b4e8efda8d829830ead2f009eb5a9444137af301b5",
+      "license": "// SPDX-License-Identifier: MIT"
+    },
+    "lib/LayerZero-v2/packages/layerzero-v2/evm/protocol/contracts/libs/AddressCast.sol": {
+      "sha256": "e48211bfba874d0ce5c3b1fc4e4aac67450ac9539a75e814807745181d04e7dd",
+      "license": "// SPDX-License-Identifier: LZBL-1.2"
+    },
+    "lib/openzeppelin-contracts/contracts/utils/introspection/IERC165.sol": {
+      "sha256": "9055c2994b37dea1a41b7b7926dcb510f05dbe2540b0aafc5fbee9558fffd0ca",
+      "license": "// SPDX-License-Identifier: MIT"
+    },
+    "lib/LayerZero-v2/packages/layerzero-v2/evm/protocol/contracts/interfaces/IMessageLib.sol": {
+      "sha256": "7a5733cf68663e1a924c5237adfdad5522a063e2214a81a7ca932242dc45481b",
+      "license": "// SPDX-License-Identifier: MIT"
+    }
+  },
+  "runtime_equal_to_block_26134012": true,
+  "functions": [
+    "SEND",
+    "SEND_AND_CALL",
+    "allowInitializePath",
+    "allowance",
+    "approvalRequired",
+    "approve",
+    "balanceOf",
+    "combineOptions",
+    "decimalConversionRate",
+    "decimals",
+    "endpoint",
+    "enforcedOptions",
+    "isComposeMsgSender",
+    "isPeer",
+    "lzReceive",
+    "lzReceiveAndRevert",
+    "lzReceiveSimulate",
+    "msgInspector",
+    "name",
+    "nextNonce",
+    "oApp",
+    "oAppVersion",
+    "oftVersion",
+    "owner",
+    "peers",
+    "preCrime",
+    "quoteOFT",
+    "quoteSend",
+    "renounceOwnership",
+    "send",
+    "setDelegate",
+    "setEnforcedOptions",
+    "setMsgInspector",
+    "setPeer",
+    "setPreCrime",
+    "sharedDecimals",
+    "symbol",
+    "token",
+    "totalSupply",
+    "transfer",
+    "transferFrom",
+    "transferOwnership",
+    "updateName",
+    "updateNameAndSymbol",
+    "updateSymbol"
+  ],
+  "reviewed_behavior": {
+    "BridgedFP": "Only metadata overrides and owner setters; standard OFT ERC20 inherited.",
+    "OFT": "Outbound bridge debit burns; incoming validated message credit mints.",
+    "OAppCore": "Immutable endpoint; onlyOwner setPeer and setDelegate.",
+    "OAppReceiver": "Incoming lzReceive requires endpoint sender and configured peer.",
+    "OFTCore": "Owner controls message inspector, enforced options and precrime; bridge limits differ from local totalSupply."
+  }
+}

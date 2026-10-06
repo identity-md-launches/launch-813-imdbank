@@ -1,0 +1,20 @@
+✔ deployment defaults fail closed until real addresses and hashes are supplied (2.395143ms)
+✔ rejects wrong chain, swapped assets, zero addresses and missing runtime hashes (11.287733ms)
+✔ fixed-point amounts retain 18 decimal precision and never use floating point (1.873362ms)
+✔ rejects unsafe, zero, nondecimal, overprecision and overflow inputs (0.597593ms)
+✔ health projection tracks supply, borrow, repay and collateral withdrawal (0.40774ms)
+✔ projection values added debt up and released collateral up (0.214361ms)
+✔ wallet account and chain must match reviewed action (0.363844ms)
+✔ wallet rejection, reverts and token failures have bounded readable messages (0.563412ms)
+✔ ABI transaction encoding carries exact amount, recipient and liquidation slippage (11.698439ms)
+✔ HTML exposes every requested screen, no remote scripts and clear launch gate (0.865315ms)
+✔ repayment preview caps the spending ceiling to debt in that asset (0.269133ms)
+✔ mutable token symbol warns without blocking repayment while decimal drift is rejected (0.680558ms)
+ℹ tests 12
+ℹ suites 0
+ℹ pass 12
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 174.010236

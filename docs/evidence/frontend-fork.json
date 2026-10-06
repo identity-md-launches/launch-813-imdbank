@@ -1,0 +1,43 @@
+{
+  "status": "PASS",
+  "browserAutomation": false,
+  "publicMainnetTransactions": false,
+  "description": "Frontend EIP-1193 adapter / BrowserProvider / ABI integration on local Ethereum fork, with real canonical tokens and a mock price oracle.",
+  "chainId": 1,
+  "startForkBlock": 26134156,
+  "startForkBlockHash": "0x98ddbf69c02074e95aecd319d12f49da56b6e0389254fabe9b8dd88ba8a3740b",
+  "evmHardfork": "Bpo2",
+  "finalBlock": 26134204,
+  "bankAddress": "0x3c2ef78E504F74F66C6536B5C9316aBFE86AaFa8",
+  "oracleAddress": "0x38FD14a2db0872F03b3Acadf820d2c12921B6639",
+  "bankSourceSha256": "452aa19d82782f39d84cfe1554871bfdafd8e0995571d8fcc63c83f51eaf0d7e",
+  "bankRuntimeCodeHash": "0x08533edd71d769019e0a5483e0e2f94b2a2b6f5bb83d596492695c9737bbaa35",
+  "oracleRuntimeCodeHash": "0xec8b87c67ca6a2a53704881f980671eca02805a37898532437414f13879911cf",
+  "testGovernance": "Impersonated local test addresses; this is not production multisig governance.",
+  "successfulReceipts": 46,
+  "tokenDonors": {
+    "IMD": "0xe54d6571aca515614927f3a70b8957c2b511603c",
+    "USDC": "0x55fe002aeff02f77364de339a1292923a15844b8",
+    "USDT": "0x55fe002aeff02f77364de339a1292923a15844b8"
+  },
+  "checks": [
+    "wallet EIP-1193 account connection",
+    "chain ID 1",
+    "runtime hashes and zero fees",
+    "real IMD approve and supply",
+    "collateral enablement",
+    "USDC, USDT and WETH borrowing",
+    "LTV rejection",
+    "unsafe collateral disable rejection",
+    "partial repayment",
+    "withdrawal",
+    "oracle-driven health-factor deterioration",
+    "liquidation minimum-output rejection",
+    "successful liquidation and IMD receipt",
+    "full repayment of every asset",
+    "final collateral withdrawal",
+    "zero remaining debt and collateral"
+  ],
+  "recorded_at_utc": "2026-10-06T15:16:06.470941+00:00",
+  "sourceQualification": "Passed using the final compiled IMDBank source, with the source SHA256 and the deployed runtime hash recorded above. Oracle is a test double; this is not browser automation."
+}

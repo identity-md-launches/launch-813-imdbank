@@ -1,0 +1,19 @@
+{
+  "url": "https://eth.blockscout.com/api/v2/tokens/0xD34a99Bc0f67aE1bbd63C660e6d0b0dd03E263B7",
+  "retrieved_at_utc": "2026-10-06T14:48:13.812305+00:00",
+  "response": {
+    "address_hash": "0xD34a99Bc0f67aE1bbd63C660e6d0b0dd03E263B7",
+    "circulating_market_cap": null,
+    "circulating_supply": null,
+    "decimals": "18",
+    "exchange_rate": null,
+    "holders_count": "3901",
+    "icon_url": null,
+    "name": "Identity.md",
+    "reputation": "ok",
+    "symbol": "IMD",
+    "total_supply": "4102251834800000000000000",
+    "type": "ERC-20",
+    "volume_24h": null
+  }
+}

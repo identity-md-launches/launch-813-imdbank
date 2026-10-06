@@ -1,0 +1,46 @@
+{
+  "status": "PASS",
+  "browserAutomation": false,
+  "publicMainnetTransactions": false,
+  "description": "Frontend EIP-1193 adapter / BrowserProvider / ABI integration on local Ethereum fork, with real canonical tokens and a mock price oracle.",
+  "chainId": 1,
+  "startForkBlock": 26134012,
+  "finalBlock": 26134164,
+  "bankAddress": "0x17d6C6f1ACefA338a62DED1b4a18579aB8942057",
+  "oracleAddress": "0x7BAB28f960154C6695E21440Ee29DBeAD9d86CF8",
+  "testGovernance": "Impersonated local test addresses; this is not production multisig governance.",
+  "successfulReceipts": 46,
+  "tokenDonors": {
+    "IMD": "0xe54d6571aca515614927f3a70b8957c2b511603c",
+    "USDC": "0x55fe002aeff02f77364de339a1292923a15844b8",
+    "USDT": "0x55fe002aeff02f77364de339a1292923a15844b8"
+  },
+  "checks": [
+    "wallet EIP-1193 account connection",
+    "chain ID 1",
+    "runtime hashes and zero fees",
+    "real IMD approve and supply",
+    "collateral enablement",
+    "USDC, USDT and WETH borrowing",
+    "LTV rejection",
+    "unsafe collateral disable rejection",
+    "partial repayment",
+    "withdrawal",
+    "oracle-driven health-factor deterioration",
+    "liquidation minimum-output rejection",
+    "successful liquidation and IMD receipt",
+    "full repayment of every asset",
+    "final collateral withdrawal",
+    "zero remaining debt and collateral"
+  ],
+  "bankRuntimeCodeHash": "0x02237041ea5960ebd396a7301fe32f00d4966772467480fe71eee332b7012e66",
+  "oracleRuntimeCodeHash": "0xec8b87c67ca6a2a53704881f980671eca02805a37898532437414f13879911cf",
+  "currentReviewedBankSourceSha256": "452aa19d82782f39d84cfe1554871bfdafd8e0995571d8fcc63c83f51eaf0d7e",
+  "sourceQualification": "This fixture report records the local deployed runtime hashes. The final source received an event-topic-only rename around the run; the recorded source hash identifies final review, not a claim that the earlier fixture runtime was rebuilt from that exact source. All 32 frontend ABI functions were rechecked against final compiled artifacts.",
+  "remainingReleaseChecks": [
+    "Real browser and branded-wallet E2E",
+    "Public HTTPS hosting verification",
+    "Production oracle and market risk approval",
+    "Independent production audit"
+  ]
+}

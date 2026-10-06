@@ -1,0 +1,19 @@
+{
+  "chainId": 1,
+  "bankAddress": null,
+  "bankCodeHash": null,
+  "oracleAddress": null,
+  "oracleCodeHash": null,
+  "rpcUrl": null,
+  "deploymentBlock": null,
+  "transactionConfirmations": 2,
+  "deploymentStatus": "NOT_DEPLOYED",
+  "researchStatus": "IMD bytecode and LayerZero OFT identity were verified at Ethereum block 26134012. Mutable owner and bridge powers, executable liquidity depth, holder concentration and a production oracle remain launch blockers. Caps must remain zero until independent review.",
+  "explorer": "https://etherscan.io",
+  "assets": {
+    "IMD": "0xD34a99Bc0f67aE1bbd63C660e6d0b0dd03E263B7",
+    "USDC": "0xA0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+    "USDT": "0xdAC17F958D2ee523a2206206994597C13D831ec7",
+    "WETH": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2"
+  }
+}

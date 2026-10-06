@@ -1,0 +1,396 @@
+Compiling 14 files with Solc 0.8.26
+Solc 0.8.26 finished in 3.94s
+Compiler run successful!
+warning[reentrancy-no-eth]: external call can be reentered before `executing` is updated
+   ╭▸ src/GovernanceTimelock.sol:70:44
+   │
+70 │         (bool ok, bytes memory returned) = target.call(data);
+   │                                            ━━━━━━━━━━━━━━━━━
+   │
+   ╰ help: https://getfoundry.sh/forge/linting/reentrancy-no-eth
+
+warning[block-timestamp]: usage of `block.timestamp` in a comparison may be manipulated by validators
+   ╭▸ src/GovernanceTimelock.sol:62:51
+   │
+62 │             executing || done[id] || when == 0 || block.timestamp < when
+   │                                                   ━━━━━━━━━━━━━━━━━━━━━━
+   │
+   ╰ help: https://getfoundry.sh/forge/linting/block-timestamp
+
+warning[block-timestamp]: usage of `block.timestamp` in a comparison may be manipulated by validators
+   ╭▸ src/GovernanceTimelock.sol:63:20
+   │
+63 │                 || block.timestamp > when + GRACE_PERIOD
+   │                    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   │
+   ╰ help: https://getfoundry.sh/forge/linting/block-timestamp
+
+warning[missing-zero-check]: address parameter is used in a state write or value transfer without a zero-address check
+   ╭▸ src/GovernanceTimelock.sol:55:22
+   │
+55 │     function execute(address target, bytes calldata data, bytes32 salt)
+   │                      ━━━━━━━━━━━━━━
+   │
+   ╰ help: https://getfoundry.sh/forge/linting/missing-zero-check
+
+warning[reentrancy-events]: event emitted after an external call; reentrancy can reorder or fabricate logs that off-chain consumers rely on
+   ╭▸ src/GovernanceTimelock.sol:73:9
+   │
+73 │         emit Executed(id);
+   │         ━━━━━━━━━━━━━━━━━━
+   │
+   ╰ help: https://getfoundry.sh/forge/linting/reentrancy-events
+
+warning[calls-loop]: external call inside a loop
+   ╭▸ src/lib/ExactToken.sol:22:26
+   │
+22 │         uint8 decimals = IExactERC20(token).decimals();
+   │                          ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   │
+   ╰ help: https://getfoundry.sh/forge/linting/calls-loop
+
+warning[missing-zero-check]: address parameter is used in a state write or value transfer without a zero-address check
+    ╭▸ src/IMDBank.sol:135:9
+    │
+135 │         address oracle_,
+    │         ━━━━━━━━━━━━━━━
+    │
+    ╰ help: https://getfoundry.sh/forge/linting/missing-zero-check
+
+warning[missing-zero-check]: address parameter is used in a state write or value transfer without a zero-address check
+    ╭▸ src/IMDBank.sol:134:9
+    │
+134 │         address collateral_,
+    │         ━━━━━━━━━━━━━━━━━━━
+    │
+    ╰ help: https://getfoundry.sh/forge/linting/missing-zero-check
+
+warning[require-revert-in-loop]: `require` or `revert` inside a loop
+    ╭▸ src/IMDBank.sol:154:64
+    │
+154 │             if (asset == collateral_ || assetUnit[asset] != 0) revert InvalidConfiguration();
+    │                                                                ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    │
+    ╰ help: https://getfoundry.sh/forge/linting/require-revert-in-loop
+
+warning[require-revert-in-loop]: `require` or `revert` inside a loop
+   ╭▸ src/lib/ExactToken.sol:21:37
+   │
+21 │         if (token.code.length == 0) revert InvalidToken();
+   │                                     ━━━━━━━━━━━━━━━━━━━━━━
+   │
+   ╰ help: https://getfoundry.sh/forge/linting/require-revert-in-loop
+
+warning[require-revert-in-loop]: `require` or `revert` inside a loop
+   ╭▸ src/lib/ExactToken.sol:23:28
+   │
+23 │         if (decimals > 18) revert InvalidToken();
+   │                            ━━━━━━━━━━━━━━━━━━━━━━
+   │
+   ╰ help: https://getfoundry.sh/forge/linting/require-revert-in-loop
+
+warning[reentrancy-events]: event emitted after an external call; reentrancy can reorder or fabricate logs that off-chain consumers rely on
+    ╭▸ src/IMDBank.sol:200:9
+    │
+200 │         emit Withdrawn(msg.sender, to, amount);
+    │         ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    │
+    ╰ help: https://getfoundry.sh/forge/linting/reentrancy-events
+
+warning[reentrancy-events]: event emitted after an external call; reentrancy can reorder or fabricate logs that off-chain consumers rely on
+    ╭▸ src/IMDBank.sol:218:9
+    │
+218 │         emit Borrowed(msg.sender, asset, to, amount, shares);
+    │         ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    │
+    ╰ help: https://getfoundry.sh/forge/linting/reentrancy-events
+
+warning[reentrancy-events]: event emitted after an external call; reentrancy can reorder or fabricate logs that off-chain consumers rely on
+    ╭▸ src/IMDBank.sol:237:9
+    │
+237 │         emit Repaid(msg.sender, onBehalfOf, asset, paid, burned);
+    │         ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    │
+    ╰ help: https://getfoundry.sh/forge/linting/reentrancy-events
+
+warning[reentrancy-events]: event emitted after an external call; reentrancy can reorder or fabricate logs that off-chain consumers rely on
+    ╭▸ src/IMDBank.sol:246:9
+    │
+246 │         emit LiquidityDonated(msg.sender, asset, amount);
+    │         ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    │
+    ╰ help: https://getfoundry.sh/forge/linting/reentrancy-events
+
+warning[reentrancy-events]: event emitted after an external call; reentrancy can reorder or fabricate logs that off-chain consumers rely on
+    ╭▸ src/IMDBank.sol:257:9
+    │
+257 │         emit BadDebtCovered(msg.sender, asset, amount);
+    │         ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    │
+    ╰ help: https://getfoundry.sh/forge/linting/reentrancy-events
+
+warning[block-timestamp]: usage of `block.timestamp` in a comparison may be manipulated by validators
+    ╭▸ src/IMDBank.sol:272:13
+    │
+272 │         if (block.timestamp > deadline) revert Expired();
+    │             ━━━━━━━━━━━━━━━━━━━━━━━━━━
+    │
+    ╰ help: https://getfoundry.sh/forge/linting/block-timestamp
+
+warning[reentrancy-events]: event emitted after an external call; reentrancy can reorder or fabricate logs that off-chain consumers rely on
+    ╭▸ src/IMDBank.sol:512:13
+    │
+512 │             emit BadDebtRecorded(account, asset, amount);
+    │             ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    │
+    ╰ help: https://getfoundry.sh/forge/linting/reentrancy-events
+
+warning[reentrancy-events]: event emitted after an external call; reentrancy can reorder or fabricate logs that off-chain consumers rely on
+    ╭▸ src/IMDBank.sol:513:13
+    │
+513 │             emit FrozenStateChanged(asset, true);
+    │             ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    │
+    ╰ help: https://getfoundry.sh/forge/linting/reentrancy-events
+
+warning[reentrancy-events]: event emitted after an external call; reentrancy can reorder or fabricate logs that off-chain consumers rely on
+    ╭▸ src/IMDBank.sol:514:13
+    │
+514 │             emit FrozenStateChanged(address(0), true);
+    │             ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    │
+    ╰ help: https://getfoundry.sh/forge/linting/reentrancy-events
+
+warning[reentrancy-events]: event emitted after an external call; reentrancy can reorder or fabricate logs that off-chain consumers rely on
+    ╭▸ src/IMDBank.sol:286:9
+    │
+286 │         emit Liquidated(msg.sender, account, asset, repaid, seized);
+    │         ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    │
+    ╰ help: https://getfoundry.sh/forge/linting/reentrancy-events
+
+warning[reentrancy-events]: event emitted after an external call; reentrancy can reorder or fabricate logs that off-chain consumers rely on
+    ╭▸ src/IMDBank.sol:308:9
+    │
+308 │         emit DustFinalized(msg.sender, account, amount);
+    │         ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    │
+    ╰ help: https://getfoundry.sh/forge/linting/reentrancy-events
+
+warning[calls-loop]: external call inside a loop
+    ╭▸ src/IMDBank.sol:597:18
+    │
+597 │         price_ = IBankOracle(oracle).price(token);
+    │                  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    │
+    ╰ help: https://getfoundry.sh/forge/linting/calls-loop
+
+warning[require-revert-in-loop]: `require` or `revert` inside a loop
+    ╭▸ src/IMDBank.sol:602:36
+    │
+602 │         if (assetUnit[asset] == 0) revert UnsupportedAsset();
+    │                                    ━━━━━━━━━━━━━━━━━━━━━━━━━━
+    │
+    ╰ help: https://getfoundry.sh/forge/linting/require-revert-in-loop
+
+warning[require-revert-in-loop]: `require` or `revert` inside a loop
+    ╭▸ src/IMDBank.sol:562:13
+    │
+562 │             revert InvalidConfiguration();
+    │             ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    │
+    ╰ help: https://getfoundry.sh/forge/linting/require-revert-in-loop
+
+warning[require-revert-in-loop]: `require` or `revert` inside a loop
+    ╭▸ src/IMDBank.sol:598:48
+    │
+598 │         if (price_ == 0 || price_ > MAX_PRICE) revert InvalidPrice();
+    │                                                ━━━━━━━━━━━━━━━━━━━━━━
+    │
+    ╰ help: https://getfoundry.sh/forge/linting/require-revert-in-loop
+
+warning[reentrancy-events]: event emitted after an external call; reentrancy can reorder or fabricate logs that off-chain consumers rely on
+    ╭▸ src/IMDBank.sol:416:9
+    │
+416 │         emit ReserveConfigured(asset, borrowCap, baseRateRay, slope1Ray, slope2Ray, kinkBps);
+    │         ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    │
+    ╰ help: https://getfoundry.sh/forge/linting/reentrancy-events
+
+warning[require-revert-in-loop]: `require` or `revert` inside a loop
+    ╭▸ src/IMDBank.sol:423:55
+    │
+423 │                 if (reserves[assets[i]].badDebt != 0) revert OutstandingBadDebt();
+    │                                                       ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    │
+    ╰ help: https://getfoundry.sh/forge/linting/require-revert-in-loop
+
+warning[require-revert-in-loop]: `require` or `revert` inside a loop
+    ╭▸ src/IMDBank.sol:495:28
+    │
+495 │             if (paid != 0) revert InvalidAmount();
+    │                            ━━━━━━━━━━━━━━━━━━━━━━━
+    │
+    ╰ help: https://getfoundry.sh/forge/linting/require-revert-in-loop
+
+warning[calls-loop]: external call inside a loop
+   ╭▸ src/lib/ExactToken.sol:17:16
+   │
+17 │         return IExactERC20(token).balanceOf(account);
+   │                ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   │
+   ╰ help: https://getfoundry.sh/forge/linting/calls-loop
+
+warning[reentrancy-events]: event emitted after an external call; reentrancy can reorder or fabricate logs that off-chain consumers rely on
+    ╭▸ src/IMDBank.sol:555:9
+    │
+555 │         emit Accrued(asset, reserve.index, reserve.cachedRateRay);
+    │         ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    │
+    ╰ help: https://getfoundry.sh/forge/linting/reentrancy-events
+
+warning[block-timestamp]: usage of `block.timestamp` in a comparison may be manipulated by validators
+    ╭▸ src/IMDBank.sol:559:45
+    │
+559 │         if (reserve.totalDebtShares == 0 || block.timestamp == reserve.lastAccrual) return reserve.index;
+    │                                             ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    │
+    ╰ help: https://getfoundry.sh/forge/linting/block-timestamp
+
+warning[block-timestamp]: usage of `block.timestamp` in a comparison may be manipulated by validators
+    ╭▸ src/IMDBank.sol:561:13
+    │
+561 │         if (block.timestamp > type(uint64).max || block.timestamp < reserve.lastAccrual) {
+    │             ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    │
+    ╰ help: https://getfoundry.sh/forge/linting/block-timestamp
+
+warning[block-timestamp]: usage of `block.timestamp` in a comparison may be manipulated by validators
+    ╭▸ src/IMDBank.sol:561:51
+    │
+561 │         if (block.timestamp > type(uint64).max || block.timestamp < reserve.lastAccrual) {
+    │                                                   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    │
+    ╰ help: https://getfoundry.sh/forge/linting/block-timestamp
+
+warning[block-timestamp]: usage of `block.timestamp` in a comparison may be manipulated by validators
+    ╭▸ src/IMDBank.sol:569:16
+    │
+569 │         while (elapsed != 0) {
+    │                ━━━━━━━━━━━━
+    │
+    ╰ help: https://getfoundry.sh/forge/linting/block-timestamp
+
+warning[block-timestamp]: usage of `block.timestamp` in a comparison may be manipulated by validators
+    ╭▸ src/IMDBank.sol:570:17
+    │
+570 │             if (elapsed & 1 != 0) accumulated = _rayMulCapped(accumulated, factor);
+    │                 ━━━━━━━━━━━━━━━━
+    │
+    ╰ help: https://getfoundry.sh/forge/linting/block-timestamp
+
+warning[block-timestamp]: usage of `block.timestamp` in a comparison may be manipulated by validators
+    ╭▸ src/IMDBank.sol:572:17
+    │
+572 │             if (elapsed != 0) factor = _rayMulCapped(factor, factor);
+    │                 ━━━━━━━━━━━━
+    │
+    ╰ help: https://getfoundry.sh/forge/linting/block-timestamp
+
+warning[reentrancy-events]: event emitted after an external call; reentrancy can reorder or fabricate logs that off-chain consumers rely on
+   ╭▸ src/RiskOracle.sol:88:9
+   │
+88 │         emit FeedConfigured(asset, primary, secondary, collateralSide);
+   │         ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   │
+   ╰ help: https://getfoundry.sh/forge/linting/reentrancy-events
+
+warning[reentrancy-events]: event emitted after an external call; reentrancy can reorder or fabricate logs that off-chain consumers rely on
+   ╭▸ src/RiskOracle.sol:89:9
+   │
+89 │         emit FeedEnabled(asset, true);
+   │         ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   │
+   ╰ help: https://getfoundry.sh/forge/linting/reentrancy-events
+
+warning[reentrancy-events]: event emitted after an external call; reentrancy can reorder or fabricate logs that off-chain consumers rely on
+   ╭▸ src/RiskOracle.sol:97:9
+   │
+97 │         emit FeedEnabled(asset, enabled);
+   │         ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   │
+   ╰ help: https://getfoundry.sh/forge/linting/reentrancy-events
+
+warning[block-timestamp]: usage of `block.timestamp` in a comparison may be manipulated by validators
+    ╭▸ src/RiskOracle.sol:119:78
+    │
+119 │             answer <= 0 || round == 0 || answered < round || updated == 0 || updated > block.timestamp
+    │                                                                              ━━━━━━━━━━━━━━━━━━━━━━━━━
+    │
+    ╰ help: https://getfoundry.sh/forge/linting/block-timestamp
+
+warning[block-timestamp]: usage of `block.timestamp` in a comparison may be manipulated by validators
+    ╭▸ src/RiskOracle.sol:120:57
+    │
+120 │                 || started == 0 || started > updated || block.timestamp - updated > maxAge
+    │                                                         ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    │
+    ╰ help: https://getfoundry.sh/forge/linting/block-timestamp
+
+warning[unsafe-typecast]: typecast can truncate values
+    ╭▸ src/RiskOracle.sol:123:13
+    │
+123 │         if (uint256(answer) > 1e36 / 10 ** (18 - decimals_)) revert InvalidPrice();
+    │             ━━━━━━━━━━━━━━━
+    │
+    ├ note: consider disabling this lint if you're certain the cast is safe
+    │       
+    │       // casting to 'uint256' is safe because [explain why]
+    │       // forge-lint: disable-next-line(unsafe-typecast)
+    │       
+    │       
+    ╰ help: https://getfoundry.sh/forge/linting/unsafe-typecast
+
+warning[unsafe-typecast]: typecast can truncate values
+    ╭▸ src/RiskOracle.sol:124:16
+    │
+124 │         return uint256(answer) * 10 ** (18 - decimals_);
+    │                ━━━━━━━━━━━━━━━
+    │
+    ├ note: consider disabling this lint if you're certain the cast is safe
+    │       
+    │       // casting to 'uint256' is safe because [explain why]
+    │       // forge-lint: disable-next-line(unsafe-typecast)
+    │       
+    │       
+    ╰ help: https://getfoundry.sh/forge/linting/unsafe-typecast
+
+warning[environment-read-across-mutation]: `block.timestamp` may be reused across `vm.warp`
+   ╭▸ test/GovernanceTimelock.t.sol:51:17
+   │
+51 │         vm.warp(block.timestamp + 2 days);
+   │         ────────━━━━━━━━━━━━━━━────────── `vm.warp` changes this environment here
+   │
+   ├ help: capture it with `vm.getBlockTimestamp()` instead
+   ╰ help: https://getfoundry.sh/forge/linting/environment-read-across-mutation
+
+warning[environment-read-across-mutation]: `block.timestamp` may be reused across `vm.warp`
+   ╭▸ test/GovernanceTimelock.t.sol:61:17
+   │
+61 │         vm.warp(block.timestamp + 2 days);
+   │         ────────━━━━━━━━━━━━━━━────────── `vm.warp` changes this environment here
+   │
+   ├ help: capture it with `vm.getBlockTimestamp()` instead
+   ╰ help: https://getfoundry.sh/forge/linting/environment-read-across-mutation
+
+warning[environment-read-across-mutation]: `block.timestamp` may be reused across `vm.warp`
+   ╭▸ test/RiskControls.t.sol:61:21
+   │
+61 │         uint256 t = block.timestamp;
+   │                     ━━━━━━━━━━━━━━━
+62 │         vm.warp(t + 30 days);
+   │         ──────────────────── `vm.warp` changes this environment here
+   │
+   ├ help: capture it with `vm.getBlockTimestamp()` instead
+   ╰ help: https://getfoundry.sh/forge/linting/environment-read-across-mutation
+

@@ -1,0 +1,3 @@
+IMDBank: 12360 runtime bytes; no DELEGATECALL, CALLCODE or SELFDESTRUCT
+RiskOracle: 4266 runtime bytes; no DELEGATECALL, CALLCODE or SELFDESTRUCT
+GovernanceTimelock: 1934 runtime bytes; no DELEGATECALL, CALLCODE or SELFDESTRUCT
