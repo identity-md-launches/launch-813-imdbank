@@ -15,6 +15,7 @@ contract ThreeReserveHandler is Test {
     address[3] public actors = [address(0xA11CE), address(0xB0B), address(0xCAFE)];
     uint256[3] public expectedCash;
     uint256[3] public expectedLoss;
+    bool[3] public expectedLossHalt;
     uint256[3] public expectedCollateral;
     uint256 public donatedCollateral;
     uint256[10] public successes;
@@ -66,10 +67,19 @@ contract ThreeReserveHandler is Test {
             assertTrue(
                 error == IMDBank.Frozen.selector || error == IMDBank.UnsafePosition.selector
                     || error == IMDBank.CapExceeded.selector
-                    || error == IMDBank.InsufficientLiquidity.selector,
+                    || error == IMDBank.InsufficientLiquidity.selector
+                    || error == IMDBank.MinimumDebt.selector,
                 "unexpected borrow error"
             );
+            if (error == IMDBank.MinimumDebt.selector) {
+                assertLt(
+                    (beforeDebt + amount) * oracle.prices(address(token)),
+                    bank.MIN_DEBT_USD() * bank.assetUnit(address(token)),
+                    "minimum debt rejected an already sufficient balance"
+                );
+            }
             assertEq(bank.previewDebt(actor, address(token)), beforeDebt, "failed borrow changed debt");
+            assertEq(token.balanceOf(recipient), receivedBefore, "failed borrow transferred funds");
         }
     }
 
@@ -211,13 +221,14 @@ contract ThreeReserveHandler is Test {
             bank.coverBadDebt(asset, amount);
             expectedCash[i] += amount;
             expectedLoss[i] -= amount;
+            if (expectedLoss[i] == 0) expectedLossHalt[i] = false;
         }
         address governor = bank.governor();
-        if (expectedLoss[i] == 0) {
+        if (!expectedLossHalt[i]) {
             vm.prank(governor);
             bank.setReserveFrozen(asset, false);
         }
-        if (expectedLoss[0] + expectedLoss[1] + expectedLoss[2] == 0) {
+        if (!expectedLossHalt[0] && !expectedLossHalt[1] && !expectedLossHalt[2]) {
             vm.prank(governor);
             bank.setFrozen(false);
         }
@@ -254,6 +265,14 @@ contract ThreeReserveHandler is Test {
         for (uint256 i; i < 3; ++i) {
             if (expectedCollateral[a] == 0) {
                 expectedLoss[i] += debts[i];
+                address asset = bank.assets(i);
+                // Record the loss decision at writeoff time. Later price moves or partial cover
+                // cannot erase a material-loss halt; only covering that reserve in full can.
+                if (
+                    debts[i] != 0
+                        && expectedLoss[i] * oracle.prices(asset)
+                            > bank.LOSS_FREEZE_USD() * bank.assetUnit(asset)
+                ) expectedLossHalt[i] = true;
                 assertEq(bank.debtShares(actors[a], bank.assets(i)), 0, "exhaustion left hidden debt");
             } else {
                 assertEq(
@@ -331,7 +350,8 @@ contract ThreeReserveInvariantTest is BankFixture {
             assertGe(index, 1e27);
             assertLe(index, 1e36);
             assertLe(rate, 1e27);
-            if (loss != 0) {
+            assertEq(bank.lossHalted(asset), handler.expectedLossHalt(i), "loss halt differs from ledger");
+            if (handler.expectedLossHalt(i)) {
                 assertTrue(bank.frozen());
                 assertTrue(isFrozen);
             }
@@ -375,5 +395,48 @@ contract ThreeReserveInvariantTest is BankFixture {
         }
         invariant_allReserveCashClaimsLossesAndRoundingAreAccountedFor();
         assertEq(bank.totalCollateral(), 0, "debt-free exit is not live");
+    }
+
+    function test_handlerTracksAccumulatedDustLossAcrossThresholdAndFullRecovery() public {
+        // Three admitted positions are repaid down to $0.50, $0.50 and one USDC base unit.
+        for (uint8 a; a < 3; ++a) {
+            handler.repay(a, 1, 0, true);
+            handler.repay(a, 2, 0, true);
+            handler.repay(a, 0, uint96(100e6 - (a == 2 ? 1 : 500_000)), false);
+        }
+        handler.shock(3, 1);
+        handler.finalizeDust(0);
+        assertEq(handler.expectedLoss(0), 500_000);
+        assertFalse(bank.frozen());
+        invariant_allReserveCashClaimsLossesAndRoundingAreAccountedFor();
+        handler.finalizeDust(1);
+        assertEq(handler.expectedLoss(0), 1e6);
+        assertFalse(bank.frozen(), "loss equal to $1 must not trigger a halt");
+        // Governance may clear an emergency freeze while only non-halting dust remains.
+        bank.setFrozen(true);
+        bank.setReserveFrozen(address(usdc), true);
+        bank.setReserveFrozen(address(usdc), false);
+        bank.setFrozen(false);
+        invariant_allReserveCashClaimsLossesAndRoundingAreAccountedFor();
+
+        handler.finalizeDust(2);
+        assertEq(handler.expectedLoss(0), 1e6 + 1);
+        assertTrue(handler.expectedLossHalt(0));
+        invariant_allReserveCashClaimsLossesAndRoundingAreAccountedFor();
+        // A price decrease and partial cover cannot undo a halt latched at loss recognition.
+        handler.shock(0, 0.5e18);
+        handler.recovery(0, 1e6, false);
+        assertEq(handler.expectedLoss(0), 1);
+        invariant_allReserveCashClaimsLossesAndRoundingAreAccountedFor();
+        vm.expectRevert(IMDBank.OutstandingBadDebt.selector);
+        bank.setFrozen(false);
+        vm.expectRevert(IMDBank.OutstandingBadDebt.selector);
+        bank.setReserveFrozen(address(usdc), false);
+
+        handler.recovery(0, 0, true);
+        assertFalse(bank.frozen());
+        assertFalse(handler.expectedLossHalt(0));
+        invariant_allReserveCashClaimsLossesAndRoundingAreAccountedFor();
+        assertEq(usdc.balanceOf(address(bank)), 1_000_000e6);
     }
 }

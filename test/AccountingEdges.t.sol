@@ -327,21 +327,84 @@ contract AccountingEdgesTest is BankFixture {
     }
 
     /// forge-config: default.fuzz.runs = 1000
+    function testFuzz_minimumDebtUsesReservePriceAndPostBorrowBalance(uint8 reserveRaw, uint16 priceRaw)
+        public
+    {
+        MockToken token = MockToken(bank.assets(reserveRaw % 3));
+        uint256 price = address(token) == address(weth)
+            ? bound(priceRaw, 500, 6000) * 1e18
+            : bound(priceRaw, 50, 200) * 1e16;
+        oracle.setPrice(address(token), price);
+        uint256 unit = bank.assetUnit(address(token));
+        uint256 minimum = (1e18 * unit + price - 1) / price;
+        _position(ALICE, 1000e18, 0);
+        uint256 cash = token.balanceOf(address(bank));
+        uint256 wallet = token.balanceOf(ALICE);
+        vm.startPrank(ALICE);
+        vm.expectRevert(IMDBank.MinimumDebt.selector);
+        bank.borrow(address(token), minimum - 1, ALICE);
+        assertEq(bank.debtShares(ALICE, address(token)), 0);
+        assertEq(token.balanceOf(address(bank)), cash);
+        assertEq(token.balanceOf(ALICE), wallet);
+
+        bank.borrow(address(token), minimum, ALICE);
+        bank.borrow(address(token), 1, ALICE);
+        assertEq(bank.previewDebt(ALICE, address(token)), minimum + 1);
+        assertEq(token.balanceOf(ALICE), wallet + minimum + 1);
+        assertEq(bank.repay(address(token), minimum, ALICE), minimum);
+        assertEq(bank.previewDebt(ALICE, address(token)), 1);
+        // Repayment may leave dust, but a borrow must bring that reserve back above the minimum.
+        vm.expectRevert(IMDBank.MinimumDebt.selector);
+        bank.borrow(address(token), 1, ALICE);
+        assertEq(bank.previewDebt(ALICE, address(token)), 1);
+        assertEq(token.balanceOf(address(bank)), cash - 1);
+        bank.borrow(address(token), minimum - 1, ALICE);
+        assertEq(bank.previewDebt(ALICE, address(token)), minimum);
+        bank.repay(address(token), type(uint256).max, ALICE);
+        vm.stopPrank();
+        assertEq(token.balanceOf(address(bank)), cash);
+        assertEq(token.balanceOf(ALICE), wallet);
+        assertEq(bank.previewDebt(ALICE, address(token)), 0);
+    }
+
+    function test_minimumDebtCannotBeSatisfiedByAnotherAccountOrReserve() public {
+        _position(ALICE, 1000e18, 100e6);
+        _position(BOB, 1000e18, 0);
+        vm.prank(ALICE);
+        vm.expectRevert(IMDBank.MinimumDebt.selector);
+        bank.borrow(address(weth), 1, ALICE);
+        vm.prank(BOB);
+        vm.expectRevert(IMDBank.MinimumDebt.selector);
+        bank.borrow(address(usdc), 1, BOB);
+        assertEq(bank.previewDebt(ALICE, address(usdc)), 100e6);
+        assertEq(bank.previewDebt(ALICE, address(weth)), 0);
+        assertEq(bank.previewDebt(BOB, address(usdc)), 0);
+    }
+
+    /// forge-config: default.fuzz.runs = 1000
     function testFuzz_repeatedTinyBorrowRepayCyclesCannotExtractCash(uint8 raw, uint32 timeRaw) public {
         MockToken token = MockToken(bank.assets(raw % 3));
+        uint256 minimum = address(token) == address(weth) ? 5e14 : 1e6;
         _position(ALICE, 1000e18, 0);
-        vm.prank(ALICE);
-        bank.borrow(address(token), 100, ALICE);
-        vm.warp(vm.getBlockTimestamp() + bound(timeRaw, 1, 365 days));
-        vm.prank(ALICE);
-        bank.repay(address(token), type(uint256).max, ALICE);
         uint256 userBefore = token.balanceOf(ALICE);
         uint256 bankBefore = token.balanceOf(address(bank));
+        vm.prank(ALICE);
+        bank.borrow(address(token), minimum, ALICE);
+        vm.warp(vm.getBlockTimestamp() + bound(timeRaw, 1, 365 days));
+        // Keep an admitted position open so one-unit top-ups exercise the rounding boundary.
+        // Repayments can leave sub-minimum residual debt; opening a new such position cannot.
+        bank.accrue(address(token));
+        uint256 debtBeforeCycles = bank.previewDebt(ALICE, address(token));
         vm.startPrank(ALICE);
         for (uint256 i = 1; i <= 16; ++i) {
             bank.borrow(address(token), i, ALICE);
-            bank.repay(address(token), type(uint256).max, ALICE);
+            uint256 debtBeforeRepay = bank.previewDebt(ALICE, address(token));
+            uint256 paid = bank.repay(address(token), i + 1, ALICE);
+            assertLe(paid, i + 1);
+            assertEq(debtBeforeRepay - bank.previewDebt(ALICE, address(token)), paid);
         }
+        assertGe(bank.previewDebt(ALICE, address(token)), debtBeforeCycles);
+        bank.repay(address(token), type(uint256).max, ALICE);
         vm.stopPrank();
         assertLe(token.balanceOf(ALICE), userBefore);
         assertGe(token.balanceOf(address(bank)), bankBefore);

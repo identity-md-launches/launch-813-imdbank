@@ -15,7 +15,7 @@ vendored. The default test run needs neither network access nor environment muta
 | `TokenBoundaryEdges.t.sol` | Every bank mutator's reentrancy guard, callbacks on inbound/outbound transfers, false/short/extra/noncanonical returns, empty returns, sender surcharges/refunds, receiver taxes/bonuses, issuer pause, and transaction rollback of claims, balances and allowances. |
 | `OptionalMainnet.t.sol` | Opt-in fork extension at the existing suite's pinned block 26,134,012, using deployment asset constants: interest-bearing repayment across three assets, unsafe-action rejection, exit, collateral exhaustion and actual-token recapitalization. Missing RPC skips the suite at setup. |
 
-The five added stateless fuzz tests each run 1,000 cases through inline configuration.
+The six contributor stateless fuzz tests each run 1,000 cases through inline configuration.
 The new invariant campaign runs 256 sequences of 96 calls with `fail-on-revert = true`.
 Expected protocol rejections are checked by selector; unexpected errors and harness assertions
 fail the run. No arbitrary revert is silently swallowed in the handler.
@@ -33,13 +33,39 @@ The handler tracks independent ledgers from successful external flows:
 - Successful borrowing/withdrawal respects LTV; a successful repayment reduces debt by
   exactly the actual payment. Liquidation execution matches an unchanged preview and charges
   no more than the submitted budget.
-- Any realized loss keeps risk frozen. Disabled or exhausted collateral leaves no active
+- Material cumulative losses latch a reserve halt at writeoff time; partial cover or a later price
+  change cannot clear it. Recorded losses at or below $1 need not halt lending. An independent
+  ghost ledger tracks the expected halt through writeoffs and recapitalization and checks both
+  the contract's halt flag and required freezes. Disabled or exhausted collateral leaves no active
   user debt. After each random sequence, full repayment and debt-free withdrawal must unwind
   every remaining claim, including when frozen or after extreme price changes.
 
 Starting supply and debt are asserted nonzero. A deterministic handler exercise separately
 reaches liquidation, dust writeoff, recapitalization, repayment and withdrawal so the important
 transitions do not depend exclusively on random discovery.
+
+## Revision for the accepted second-round repairs
+
+This revision preserves the existing suites and updates the expectations affected by R2-01,
+R2-02 and R2-03. The initial build exposed an outdated eleven-field oracle getter destructure;
+after correcting it, the baseline run exposed three stale expectations (two-sided price bands,
+opening tiny debts, and the invariant handler rejecting `MinimumDebt`). Those are test
+compatibility issues with the accepted repairs, not new contract defects.
+
+- Oracle integration now checks the added pause field, failed-enable rollback, agreed collateral
+  crashes below the configured floor and debt spikes above the ceiling. Real bank liquidations
+  must remain possible in both adverse price directions. A guardian-pause scenario checks the
+  exact expiry, stale observations at expiry, fresh observations restoring liquidation while the
+  bank is frozen, and failure to extend the pause by repeating it or rotating the guardian.
+- A new 1,000-case property checks the minimum debt at differing reserve prices and precisions,
+  atomic rejection one native unit below the boundary, one-unit top-ups, repayment-created dust,
+  and reopening only when the resulting debt satisfies the minimum. A unit test prevents another
+  account or reserve from satisfying that minimum. Repeated tiny borrow/repay cycles retain an
+  admitted position while exercising one-unit rounding and end with a full repayment/no-profit check.
+- The existing random handler still generates sub-minimum amounts, checks the specific rejection
+  and verifies rollback. Its loss model distinguishes non-halting dust from a material-loss halt.
+  A deterministic sequence accumulates $0.50, another $0.50, then one USDC base unit of loss;
+  it verifies the strict threshold, failed restart after partial cover, and full recapitalization.
 
 ## Running
 
@@ -58,9 +84,13 @@ forge test --match-contract OptionalMainnetTest -vv
 The RPC value is never committed or set by a test. An explicitly supplied but unusable endpoint
 fails, rather than being treated as a successful fork run.
 
-Final local verification: `forge build` succeeded, with compiler lint warnings; `forge test`
-completed with **90 passed, 0 failed, 1 skipped**. Foundry reports the optional fork suite's setup
-as the single skip. The new invariant completed **256 runs / 24,576 calls / 0 handler reverts**.
+Final local verification: `forge build` succeeded with compiler lint warnings; `forge test`
+completed with **101 passed, 0 failed, 1 skipped** on Foundry 1.8.3. The optional fork suite's setup
+is the single skip because no RPC is configured. The three-reserve invariant completed
+**256 runs / 24,576 calls / 0 handler reverts**. `forge fmt` and `git diff --check` also passed.
+Build outputs and caches were redirected into `test/scratch/` to keep generated files inside the
+assignment's write scope; no source, configuration or dependency changes are required for the
+default commands above.
 
 ## Scope and limitations
 

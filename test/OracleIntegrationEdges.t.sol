@@ -139,7 +139,7 @@ contract OracleIntegrationEdgesTest is BankFixture {
         }
     }
 
-    function test_priceBandsRejectAgreementOutsideConfiguredRange() public {
+    function test_priceBandsRejectOvervaluationButAcceptCollateralCrash() public {
         guarded.configure(
             address(imd), address(primary[0]), address(secondary[0]), 60, 120, 1000, 9e18, 11e18, true
         );
@@ -147,8 +147,7 @@ contract OracleIntegrationEdgesTest is BankFixture {
         secondary[0].setAnswer(9e8);
         assertEq(guarded.price(address(imd)), 9e18);
         primary[0].setAnswer(9e8 - 1);
-        vm.expectRevert(RiskOracle.InvalidPrice.selector);
-        guarded.price(address(imd));
+        assertEq(guarded.price(address(imd)), 9e18 - 1e10);
         primary[0].setAnswer(11e8);
         secondary[0].setAnswer(11e8);
         assertEq(guarded.price(address(imd)), 11e18);
@@ -170,7 +169,8 @@ contract OracleIntegrationEdgesTest is BankFixture {
             uint32 ageS,
             uint16 deviation,,,
             bool collateralSide,
-            bool enabled
+            bool enabled,
+            uint64 pausedUntil
         ) = guarded.feeds(address(imd));
         assertEq(p, address(primary[0]));
         assertEq(s, address(secondary[0]));
@@ -181,7 +181,106 @@ contract OracleIntegrationEdgesTest is BankFixture {
         assertEq(deviation, 1000);
         assertTrue(collateralSide);
         assertTrue(enabled);
+        assertEq(pausedUntil, 0);
         assertEq(guarded.price(address(imd)), 10e18);
+    }
+
+    function test_agreedCollateralCrashBelowConfiguredFloorStillLiquidates() public {
+        guarded.configure(
+            address(imd), address(primary[0]), address(secondary[0]), 60, 120, 1000, 5e18, 11e18, true
+        );
+        _position(ALICE, 1000e18, 2500e6);
+        primary[0].setAnswer(4e8);
+        secondary[0].setAnswer(4e8);
+        assertEq(guarded.price(address(imd)), 4e18);
+        (,,,, uint256 hf) = bank.accountData(ALICE);
+        assertLt(hf, 1e18);
+        uint256 cash = usdc.balanceOf(address(bank));
+        uint256 recipient = imd.balanceOf(LIQUIDATOR);
+        vm.prank(LIQUIDATOR);
+        (uint256 paid, uint256 seized) = bank.liquidate(ALICE, address(usdc), 1000e6, 270e18, block.timestamp);
+        assertEq(paid, 1000e6);
+        assertEq(seized, 270e18);
+        assertEq(bank.previewDebt(ALICE, address(usdc)), 1500e6);
+        assertEq(bank.collateralBalance(ALICE), 730e18);
+        assertEq(usdc.balanceOf(address(bank)), cash + paid);
+        assertEq(imd.balanceOf(LIQUIDATOR), recipient + seized);
+    }
+
+    function test_agreedDebtSpikeAboveConfiguredCeilingStillLiquidates() public {
+        guarded.configure(
+            address(usdc), address(primary[1]), address(secondary[1]), 60, 120, 1000, 0.5e18, 1.1e18, false
+        );
+        _position(ALICE, 1000e18, 2500e6);
+        primary[1].setAnswer(2e8);
+        secondary[1].setAnswer(2e8);
+        assertEq(guarded.price(address(usdc)), 2e18);
+        (, uint256 debt,,, uint256 hf) = bank.accountData(ALICE);
+        assertEq(debt, 5000e18);
+        assertLt(hf, 1e18);
+        vm.prank(LIQUIDATOR);
+        (uint256 paid, uint256 seized) = bank.liquidate(ALICE, address(usdc), 100e6, 21.6e18, block.timestamp);
+        assertEq(paid, 100e6);
+        assertEq(seized, 21.6e18);
+        assertEq(bank.previewDebt(ALICE, address(usdc)), 2400e6);
+        assertEq(bank.collateralBalance(ALICE), 978.4e18);
+    }
+
+    function test_guardianPauseExpiresAndLiquidationResumesWhileBankFrozen() public {
+        _position(ALICE, 1000e18, 2500e6);
+        uint256 expiry = vm.getBlockTimestamp() + guarded.guardianPause();
+        vm.startPrank(GUARDIAN);
+        guarded.setEnabled(address(imd), false);
+        bank.setFrozen(true);
+        vm.expectRevert(RiskOracle.Unauthorized.selector);
+        guarded.setEnabled(address(imd), false);
+        vm.stopPrank();
+        vm.prank(LIQUIDATOR);
+        vm.expectRevert(RiskOracle.Disabled.selector);
+        bank.liquidate(ALICE, address(usdc), 100e6, 0, block.timestamp);
+        // Users can still add collateral and repay while pricing is paused.
+        vm.startPrank(ALICE);
+        bank.supply(1e18, ALICE);
+        bank.repay(address(usdc), 1e6, ALICE);
+        vm.stopPrank();
+        assertEq(bank.previewDebt(ALICE, address(usdc)), 2499e6);
+
+        vm.warp(expiry - 1);
+        vm.expectRevert(RiskOracle.Disabled.selector);
+        guarded.price(address(imd));
+        vm.warp(expiry);
+        // Fresh independent observations are still required at expiry.
+        vm.expectRevert(RiskOracle.InvalidPrice.selector);
+        guarded.price(address(imd));
+        for (uint256 i; i < 4; ++i) {
+            primary[i].setRound(11, 11, expiry, expiry);
+            secondary[i].setRound(11, 11, expiry, expiry);
+        }
+        primary[0].setAnswer(4e8);
+        secondary[0].setAnswer(4e8);
+        vm.prank(GUARDIAN);
+        vm.expectRevert(RiskOracle.Unauthorized.selector);
+        guarded.setEnabled(address(imd), false);
+        // Rotating the guardian also cannot replenish a consumed per-feed pause.
+        address replacement = address(0xD00D);
+        guarded.setGuardian(replacement);
+        vm.prank(replacement);
+        vm.expectRevert(RiskOracle.Unauthorized.selector);
+        guarded.setEnabled(address(imd), false);
+
+        uint256 beforeDebt = bank.previewDebt(ALICE, address(usdc));
+        uint256 cash = usdc.balanceOf(address(bank));
+        (uint256 quotedPaid, uint256 quotedSeized) = bank.previewLiquidation(ALICE, address(usdc), 100e6);
+        vm.prank(LIQUIDATOR);
+        (uint256 paid, uint256 seized) =
+            bank.liquidate(ALICE, address(usdc), 100e6, quotedSeized, block.timestamp);
+        assertEq(paid, quotedPaid);
+        assertEq(seized, quotedSeized);
+        assertGt(paid, 0);
+        assertGt(seized, 0);
+        assertEq(bank.previewDebt(ALICE, address(usdc)), beforeDebt - paid);
+        assertEq(usdc.balanceOf(address(bank)), cash + paid);
+        assertTrue(bank.frozen());
     }
 
     function test_brokenFeedCannotBeReenabledAndFailedEnableRemainsDisabled() public {
@@ -192,8 +291,13 @@ contract OracleIntegrationEdgesTest is BankFixture {
         guarded.setEnabled(address(imd), true);
         vm.expectRevert(RiskOracle.Disabled.selector);
         guarded.price(address(imd));
+        (,,,,,,,,,, bool enabled, uint64 pausedUntil) = guarded.feeds(address(imd));
+        assertTrue(enabled);
+        assertEq(pausedUntil, vm.getBlockTimestamp() + guarded.guardianPause());
         primary[0].setAnswer(10e8);
         guarded.setEnabled(address(imd), true);
+        (,,,,,,,,,,, pausedUntil) = guarded.feeds(address(imd));
+        assertEq(pausedUntil, 0);
         assertEq(guarded.price(address(imd)), 10e18);
     }
 
