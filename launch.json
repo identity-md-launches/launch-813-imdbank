@@ -1,0 +1,33 @@
+{
+  "kind": "evm_contracts",
+  "contracts": [
+    {
+      "contract": "GovernanceTimelock",
+      "constructorArgs": [
+        "$owner",
+        "0x0000000000000000000000000000000000000000",
+        "172800"
+      ]
+    },
+    {
+      "contract": "RiskOracle",
+      "constructorArgs": [
+        "$contract:GovernanceTimelock",
+        "0x0000000000000000000000000000000000000000"
+      ]
+    },
+    {
+      "contract": "IMDBank",
+      "constructorArgs": [
+        "$contract:GovernanceTimelock",
+        "0x0000000000000000000000000000000000000000",
+        "0xD34a99Bc0f67aE1bbd63C660e6d0b0dd03E263B7",
+        "$contract:RiskOracle",
+        "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+        "0xdAC17F958D2ee523a2206206994597C13D831ec7",
+        "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2"
+      ]
+    }
+  ],
+  "notes": "BLOCKED DRAFT, NOT DEPLOYABLE: the supplied brief does not identify an authorized emergency guardian/canceller. Each zero address is an unresolved role, not a proposed beneficiary. The accepted constructors reject zero roles; GovernanceTimelock also rejects a canceller equal to its proposer. Replace constructorArgs[1] in all three entries with the same explicitly authorized, nonzero emergency multisig address distinct from $owner, then repeat manifest and factory deployment validation. Do not substitute a worker wallet, token administrator, token contract, factory, test address or an invented multisig. $owner is the governance proposer; it should resolve to the reviewed governance multisig. The timelock governs RiskOracle and IMDBank with a 172800-second delay. Deployment targets Ethereum Mainnet, chain ID 1, with IMD collateral and USDC, USDT and WETH reserves in that order. IMDBank enforces name and symbol IMDBANK and an immutable 0% protocol fee; variable borrower interest and liquidation compensation are separate. IMDBANK is a nontransferable collateral receipt ledger, not a newly deployed ERC20. The manifest requests no ETH, initializer or funding transaction. Accepted constructor state is inactive: zero supply and borrow caps, globally frozen bank and unconfigured oracle feeds. This is not approval to activate markets or accept funds. Reserve donations are irrevocable and issue no redemption claim. Research and limitations are recorded in docs/RESEARCH.md; architecture, validation, security findings and deployment prerequisites are in docs/ARCHITECTURE.md, docs/VALIDATION.md, docs/SECURITY_REVIEW.md and docs/DEPLOYMENT.md. Independent IMD pricing, liquidity/risk evidence, final governance verification, security signoff and a verified public frontend deployment remain unresolved; no public HTTPS deployment or production readiness is asserted. This draft records the resolved ABI and dependency plan but cannot satisfy successful constructor rehearsal until the missing authority is supplied."
+}
