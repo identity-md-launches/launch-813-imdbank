@@ -13,6 +13,8 @@ interface IAggregator {
 
 /// @notice Two-source USD oracle. Governance must verify source independence off chain.
 /// @dev Unconfigured/disabled/invalid feeds revert. There is deliberately no manual price fallback.
+/// A guardian pause is bounded and single-use per governance decision, so the emergency key can delay
+/// but never permanently block liquidation or loss recognition.
 contract RiskOracle {
     struct Feed {
         address primary;
@@ -26,10 +28,17 @@ contract RiskOracle {
         uint8 secondaryDecimals;
         bool collateralSide;
         bool enabled;
+        uint64 guardianPausedUntil;
     }
 
+    uint256 public constant MAX_AGE = 2 days;
+    uint256 public constant MIN_GUARDIAN_PAUSE = 2 days;
+    uint256 public constant MAX_GUARDIAN_PAUSE = 30 days;
+
     address public immutable governor;
-    address public immutable guardian;
+    address public guardian;
+    /// @notice Length of one guardian pause. Governance should keep it at least the timelock delay.
+    uint256 public guardianPause = 2 days;
     mapping(address => Feed) public feeds;
 
     error Unauthorized();
@@ -39,6 +48,9 @@ contract RiskOracle {
 
     event FeedConfigured(address indexed asset, address primary, address secondary, bool collateralSide);
     event FeedEnabled(address indexed asset, bool enabled);
+    event FeedPaused(address indexed asset, uint256 until);
+    event GuardianChanged(address indexed guardian);
+    event GuardianPauseChanged(uint256 duration);
 
     constructor(address governor_, address guardian_) {
         if (governor_ == address(0) || guardian_ == address(0) || governor_ == guardian_) {
@@ -49,6 +61,9 @@ contract RiskOracle {
     }
 
     /// @notice Call only through the production governance timelock. Prices use 18 USD decimals.
+    /// @dev Bounds reject only prices that would overvalue a borrower: a collateral feed is capped at
+    /// `maxPrice`, a debt feed is floored at `minPrice` (zero means no floor). A collateral crash or a
+    /// debt spike is therefore priced as reported, so liquidation and loss recognition stay live.
     function configure(
         address asset,
         address primary,
@@ -64,8 +79,8 @@ contract RiskOracle {
         if (
             asset.code.length == 0 || primary.code.length == 0 || secondary.code.length == 0
                 || primary == secondary || primaryMaxAge == 0 || secondaryMaxAge == 0
-                || primaryMaxAge > 1 days || secondaryMaxAge > 1 days || maxDeviationBps == 0
-                || maxDeviationBps > 2000 || minPrice == 0 || maxPrice <= minPrice || maxPrice > 1e36
+                || primaryMaxAge > MAX_AGE || secondaryMaxAge > MAX_AGE || maxDeviationBps == 0
+                || maxDeviationBps > 2000 || maxPrice <= minPrice || maxPrice > 1e36
         ) revert InvalidConfiguration();
         uint8 pd = IAggregator(primary).decimals();
         uint8 sd = IAggregator(secondary).decimals();
@@ -81,7 +96,8 @@ contract RiskOracle {
             pd,
             sd,
             collateralSide,
-            true
+            true,
+            0
         );
         // Do not activate a broken pair even through governance.
         price(asset);
@@ -89,23 +105,49 @@ contract RiskOracle {
         emit FeedEnabled(asset, true);
     }
 
+    /// @notice Governance enables or disables a feed indefinitely and re-arms the guardian pause.
+    /// The guardian may only start one bounded pause of an enabled feed per governance decision.
     function setEnabled(address asset, bool enabled) external {
-        if (msg.sender != governor && (msg.sender != guardian || enabled)) revert Unauthorized();
-        if (feeds[asset].primary == address(0)) revert InvalidConfiguration();
-        feeds[asset].enabled = enabled;
-        if (enabled) price(asset);
-        emit FeedEnabled(asset, enabled);
+        Feed storage f = feeds[asset];
+        if (f.primary == address(0)) revert InvalidConfiguration();
+        if (msg.sender == governor) {
+            f.enabled = enabled;
+            f.guardianPausedUntil = 0;
+            if (enabled) price(asset);
+            emit FeedEnabled(asset, enabled);
+        } else if (msg.sender == guardian && !enabled) {
+            if (!f.enabled || f.guardianPausedUntil != 0) revert Unauthorized();
+            uint256 until = block.timestamp + guardianPause;
+            f.guardianPausedUntil = uint64(until);
+            emit FeedPaused(asset, until);
+        } else {
+            revert Unauthorized();
+        }
+    }
+
+    function setGuardian(address guardian_) external {
+        if (msg.sender != governor) revert Unauthorized();
+        if (guardian_ == address(0) || guardian_ == governor) revert InvalidConfiguration();
+        guardian = guardian_;
+        emit GuardianChanged(guardian_);
+    }
+
+    function setGuardianPause(uint256 duration) external {
+        if (msg.sender != governor) revert Unauthorized();
+        if (duration < MIN_GUARDIAN_PAUSE || duration > MAX_GUARDIAN_PAUSE) revert InvalidConfiguration();
+        guardianPause = duration;
+        emit GuardianPauseChanged(duration);
     }
 
     function price(address asset) public view returns (uint256) {
         Feed memory f = feeds[asset];
-        if (!f.enabled) revert Disabled();
+        if (!f.enabled || block.timestamp < f.guardianPausedUntil) revert Disabled();
         uint256 a = _read(f.primary, f.primaryDecimals, f.primaryMaxAge);
         uint256 b = _read(f.secondary, f.secondaryDecimals, f.secondaryMaxAge);
         uint256 low = Math.min(a, b);
         uint256 high = Math.max(a, b);
         if (
-            low < f.minPrice || high > f.maxPrice
+            (f.collateralSide ? high > f.maxPrice : low < f.minPrice)
                 || Math.mulDiv(high - low, 10_000, low, Math.Rounding.Ceil) > f.maxDeviationBps
         ) revert InvalidPrice();
         // Debt uses the higher price; collateral uses the lower. No assumed stablecoin peg.

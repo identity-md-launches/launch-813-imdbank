@@ -1,5 +1,6 @@
 export const bankAbi = [
-  ...['Unauthorized','InvalidConfiguration','UnsupportedAsset','InvalidAmount','InvalidRecipient','Reentrancy','Frozen','CapExceeded','InsufficientLiquidity','UnsafePosition','HealthyPosition','InvalidPrice','Dust','Expired','Slippage','OutstandingBadDebt'].map(name => `error ${name}()`),
+  ...['Unauthorized','InvalidConfiguration','UnsupportedAsset','InvalidAmount','InvalidRecipient','Reentrancy','Frozen','CapExceeded','InsufficientLiquidity','UnsafePosition','HealthyPosition','InvalidPrice','Dust','Expired','Slippage','OutstandingBadDebt','MinimumDebt'].map(name => `error ${name}()`),
+  'function MIN_DEBT_USD() view returns (uint256)', 'function LOSS_FREEZE_USD() view returns (uint256)',
   'function name() view returns (string)', 'function symbol() view returns (string)',
   'function feeBps() view returns (uint256)',
   'function collateral() view returns (address)', 'function oracle() view returns (address)',

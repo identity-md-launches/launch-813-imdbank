@@ -74,6 +74,25 @@ test('HTML exposes every requested screen, no remote scripts and clear launch ga
   assert.match(html,/Production activation is blocked/);
 });
 
+test('projection flags borrow and withdrawal above the loan-to-value capacity the contract enforces', async () => {
+  const {projectedPosition}=await import('../core.js');
+  const base={collateralUsd:10000n*USD,debtUsd:0n,liquidationBps:3500n,ltvBps:2500n,decimals:6,price:USD,enabled:true};
+  const borrow=projectedPosition({...base,action:'borrow',amount:3000n*10n**6n});
+  assert.equal(borrow.health,10000n*USD*3500n/10000n*USD/(3000n*USD));
+  assert.equal(borrow.capacityUsd,2500n*USD);
+  assert.equal(borrow.exceedsCapacity,true);
+  assert.equal(projectedPosition({...base,action:'borrow',amount:2500n*10n**6n}).exceedsCapacity,false);
+  const withdraw=projectedPosition({...base,debtUsd:2500n*USD,decimals:18,price:10n*USD,action:'withdraw',amount:USD});
+  assert.equal(withdraw.exceedsCapacity,true);
+  assert.ok(withdraw.health>USD);
+  assert.equal(projectedPosition({...base,debtUsd:2500n*USD,decimals:18,price:10n*USD,action:'supply',amount:1n}).exceedsCapacity,false);
+  assert.equal(projectedPosition({...base,debtUsd:2500n*USD,decimals:18,price:10n*USD,action:'withdraw',amount:1n}).exceedsCapacity,true);
+  assert.equal(projectedPosition({...base,debtUsd:3000n*USD,action:'repay',amount:1n}).exceedsCapacity,false);
+  assert.equal(projectedPosition({...base,action:'withdraw',amount:USD}).exceedsCapacity,false);
+  assert.equal(projectedPosition({...base,ltvBps:undefined,action:'borrow',amount:3000n*10n**6n}).capacityUsd,null);
+  assert.match(errorText({revert:{name:'MinimumDebt'}}),/at least \$1/);
+});
+
 test('repayment preview caps the spending ceiling to debt in that asset', () => {
   const value=projectedHealth({collateralUsd:10000n*USD,debtUsd:1100n*USD,liquidationBps:3500n,action:'repay',amount:10000n*USD,assetDebt:100n*USD,decimals:18,price:USD,enabled:true});
   assert.equal(value,35n*USD/10n);

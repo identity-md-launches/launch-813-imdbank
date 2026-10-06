@@ -115,25 +115,63 @@ contract IndependentAuditTest is Test {
     /// @dev M-04 regression: small recoverable position cannot trigger a needless writeoff.
     function testAudit_smallRecoverablePositionCannotTriggerGlobalFreeze() public {
         address borrower = address(0xD057);
-        imd.mint(borrower, 1e14);
+        imd.mint(borrower, 4e17);
         vm.startPrank(borrower);
         imd.approve(address(bank), type(uint256).max);
-        bank.supply(1e14, borrower); // $0.001 at initial $10 price.
+        bank.supply(4e17, borrower); // $4 at initial $10 price.
         bank.setCollateralEnabled(true);
-        bank.borrow(address(usdc), 200, borrower); // $0.0002.
+        bank.borrow(address(usdc), 1e6, borrower); // $1, the smallest admitted debt.
         vm.stopPrank();
-        prices.setPrice(address(imd), 5e18); // Collateral now $0.0005, HF 0.875, solvent.
-        (uint256 repayable,) = bank.previewLiquidation(borrower, address(usdc), 200);
-        assertEq(repayable, 200);
+        prices.setPrice(address(imd), 5e18); // Collateral now $2, HF 0.70, solvent.
+        (uint256 repayable,) = bank.previewLiquidation(borrower, address(usdc), 1e6);
+        assertEq(repayable, 1e6);
         vm.expectRevert();
         bank.finalizeDust(borrower);
         (,,,,, uint256 badDebt, bool frozen) = bank.reserveData(address(usdc));
         assertEq(badDebt, 0);
         assertFalse(frozen);
         assertFalse(bank.frozen());
-        usdc.mint(address(this), 200);
-        bank.liquidate(borrower, address(usdc), 200, 0, block.timestamp);
+        usdc.mint(address(this), 1e6);
+        bank.liquidate(borrower, address(usdc), 1e6, 0, block.timestamp);
         assertEq(bank.previewDebt(borrower, address(usdc)), 0);
+    }
+
+    /// @dev R2-02 regression: one-base-unit debts are not admitted, and a dust loss that still arises
+    /// through repayment/withdrawal is recorded and coverable without halting the bank.
+    function testAudit_minimumDebtAndDustLossDoNotHaltLending() public {
+        address borrower = address(0x1055);
+        imd.mint(borrower, 1e18);
+        vm.startPrank(borrower);
+        imd.approve(address(bank), type(uint256).max);
+        bank.supply(1e18, borrower);
+        bank.setCollateralEnabled(true);
+        vm.expectRevert(IMDBank.MinimumDebt.selector);
+        bank.borrow(address(usdc), 1, borrower);
+        vm.expectRevert(IMDBank.MinimumDebt.selector);
+        bank.borrow(address(usdc), 999_999, borrower);
+        bank.borrow(address(usdc), 1e6, borrower);
+        bank.borrow(address(usdc), 1, borrower); // Top-ups above the minimum stay unrestricted.
+        usdc.approve(address(bank), type(uint256).max);
+        bank.repay(address(usdc), 1e6, borrower); // Leaves one base unit of debt.
+        assertEq(bank.previewDebt(borrower, address(usdc)), 1);
+        bank.withdraw(1e18 - 4e11, borrower); // $0.000004 of collateral remains at $10.
+        vm.stopPrank();
+        prices.setPrice(address(imd), 2.4e18); // Residual is $0.00000096, below one repayable unit.
+        bank.finalizeDust(borrower);
+        (,,,,, uint256 badDebt, bool reserveFrozen) = bank.reserveData(address(usdc));
+        assertEq(badDebt, 1);
+        assertFalse(reserveFrozen);
+        assertFalse(bank.frozen());
+        assertFalse(bank.lossHalted(address(usdc)));
+        assertEq(bank.previewDebt(borrower, address(usdc)), 0);
+        // Lending continues for everyone, and anyone can still cover the recorded dust.
+        prices.setPrice(address(imd), 10e18);
+        vm.prank(ALICE);
+        bank.borrow(address(usdc), 1e6, ALICE);
+        usdc.mint(address(this), 1);
+        bank.coverBadDebt(address(usdc), 1);
+        (,,,,, badDebt,) = bank.reserveData(address(usdc));
+        assertEq(badDebt, 0);
     }
 
     function testAudit_insolventButPartlyRecoverableDustMustLiquidateFirst() public {
@@ -146,22 +184,40 @@ contract IndependentAuditTest is Test {
         assertEq(bank.previewDebt(ALICE, address(usdc)), 1500e6);
     }
 
-    /// @dev Residual accepted M-05: even one native unit of genuine loss globally halts new risk.
-    function testAudit_actualTinyLossTriggersGlobalSafetyHalt() public {
-        address borrower = address(0x1055);
-        imd.mint(borrower, 4e11);
+    /// @dev R2-07 regression: a collateral-limited payment whose seizure floors to zero still sweeps the
+    /// residual wei, so the position is closed by an ordinary liquidation instead of being stuck.
+    function testAudit_seizureFlooringToZeroStillSweepsResidue() public {
+        bank.configureReserve(address(weth), 1_000e18, 0, 0, 0, 8000);
+        bank.setReserveFrozen(address(weth), false);
+        weth.mint(address(this), 1_000e18);
+        weth.approve(address(bank), type(uint256).max);
+        bank.donateLiquidity(address(weth), 1_000e18);
+        address borrower = address(0x5EED);
+        imd.mint(borrower, 1e18);
         vm.startPrank(borrower);
         imd.approve(address(bank), type(uint256).max);
-        bank.supply(4e11, borrower); // $0.000004 at $10 IMD.
+        weth.approve(address(bank), type(uint256).max);
+        bank.supply(1e18, borrower);
         bank.setCollateralEnabled(true);
-        bank.borrow(address(usdc), 1, borrower); // One USDC base unit.
+        bank.borrow(address(weth), 5e14, borrower); // $1 of WETH.
+        bank.repay(address(weth), 5e14 - 125_000, borrower); // 125,000 wei of debt remain.
         vm.stopPrank();
-        prices.setPrice(address(imd), 2.4e18); // Residual is $0.00000096, below one repayable unit.
-        bank.finalizeDust(borrower);
-        (,,,,, uint256 badDebt,) = bank.reserveData(address(usdc));
-        assertEq(badDebt, 1);
-        assertTrue(bank.frozen());
-        assertEq(bank.previewDebt(borrower, address(usdc)), 0);
+        prices.setPrice(address(imd), 1e27); // Accepted ceiling: one wei of IMD is worth 1e9 USD-wei.
+        vm.prank(borrower);
+        bank.withdraw(1e18 - 1, borrower);
+        prices.setPrice(address(imd), 2e26); // Collateral 2e8 USD-wei against 2.5e8 of debt.
+        (,,,, uint256 hf) = bank.accountData(borrower);
+        assertLt(hf, 1e18);
+        (uint256 repaid, uint256 seized) = bank.previewLiquidation(borrower, address(weth), type(uint256).max);
+        assertEq(seized, 1);
+        assertGt(repaid, 0);
+        weth.mint(address(this), repaid);
+        bank.liquidate(borrower, address(weth), type(uint256).max, 1, block.timestamp);
+        assertEq(bank.collateralBalance(borrower), 0);
+        assertEq(bank.previewDebt(borrower, address(weth)), 0);
+        (,,,,, uint256 badDebt,) = bank.reserveData(address(weth));
+        assertEq(badDebt, 125_000 - repaid);
+        assertFalse(bank.frozen());
     }
 
     /// @dev Governance cannot bypass the oracle's rejection of independent-source divergence.

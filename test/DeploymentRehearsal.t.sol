@@ -21,14 +21,17 @@ contract DeploymentRehearsalTest is Test {
         vm.etch(deployer.USDT(), address(token6).code);
         vm.etch(deployer.WETH(), address(token18).code);
         address proposer = address(new RehearsalRole());
+        address veto = address(new RehearsalRole());
         address guardian = address(new RehearsalRole());
-        (GovernanceTimelock timelock, RiskOracle oracle, IMDBank bank) = deployer.deploy(proposer, guardian);
+        (GovernanceTimelock timelock, RiskOracle oracle, IMDBank bank) =
+            deployer.deploy(proposer, veto, guardian);
         assertEq(timelock.proposer(), proposer);
-        assertEq(timelock.canceller(), guardian);
+        assertEq(timelock.canceller(), veto);
         assertEq(bank.governor(), address(timelock));
         assertEq(oracle.governor(), address(timelock));
         assertEq(bank.guardian(), guardian);
         assertEq(oracle.guardian(), guardian);
+        assertGe(oracle.guardianPause(), timelock.delay());
         assertEq(bank.supplyCap(), 0);
         assertTrue(bank.frozen());
         vm.expectRevert();
@@ -44,13 +47,21 @@ contract DeploymentRehearsalTest is Test {
         assertTrue(bank.frozen());
     }
 
-    function test_wrongChainAndEOARolesRejected() public {
+    function test_wrongChainEOAAndSharedRolesRejected() public {
         DeployMainnet deployer = new DeployMainnet();
+        address a = address(new RehearsalRole());
+        address b = address(new RehearsalRole());
+        address c = address(new RehearsalRole());
         vm.chainId(2);
         vm.expectRevert();
-        deployer.deploy(address(1), address(2));
+        deployer.deploy(a, b, c);
         vm.chainId(1);
         vm.expectRevert();
-        deployer.deploy(address(1), address(2));
+        deployer.deploy(address(1), address(2), address(3));
+        // The emergency guardian may not also hold the timelock veto.
+        vm.expectRevert(bytes("separate roles required"));
+        deployer.deploy(a, c, c);
+        vm.expectRevert(bytes("separate roles required"));
+        deployer.deploy(a, a, c);
     }
 }

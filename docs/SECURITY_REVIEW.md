@@ -10,9 +10,46 @@ Review date: 2026-10-06. Reviewer: separate research/security contributor agent,
 | M-02 | Medium | Collateral below the debt token's smallest unit could not liquidate or finalize, leaving losses unrecognized | Repaired with guarded dust finalization; regressions pass |
 | M-03 | Medium, frontend availability | IMD owner metadata changes disabled every website transaction, including repayment/exit | Repaired in source; browser metadata-mutation coverage remains a QA item |
 | M-04 | Medium, availability | Dust finalization wrote off fully recoverable small positions and triggered global freeze | Repaired; rejection and ordinary recovery regressions pass |
-| M-05 | Medium, residual availability | A genuine one-base-unit loss globally halts new borrowing | Open, explicit safety-first policy; quantified by regression |
+| M-05 | Medium, residual availability | A genuine one-base-unit loss globally halts new borrowing | Superseded by R2-02: minimum debt and dust-loss policy; regression rewritten |
 
-No Critical or High code exploit was established during the reviewed scope at this snapshot. That statement is narrower than a claim of production safety. The residual Medium availability limitation and the release blockers below prevent a production-ready conclusion.
+No Critical or High code exploit was established during the reviewed scope at this snapshot. That statement is narrower than a claim of production safety. The release blockers below prevent a production-ready conclusion.
+
+## Second independent review round (2026-10-06)
+
+An independent reviewer on another machine reopened the accepted work with four reproducible Medium findings, each with a Foundry proof, and five advisories. Every proof failed on the accepted tree and passes on the revised tree; the full suite, formatter and bytecode policy pass. Responses are recorded in `.imd-responses.json`.
+
+| ID | Severity | Finding | Status |
+| --- | --- | --- | --- |
+| R2-01 | Medium | Hard oracle price band rejected a two-feed-agreed collateral crash or debt spike, so liquidation, finalization, borrowing and debt-bearing withdrawal reverted exactly when loss recognition was needed | Fixed: bounds reject only the direction that overvalues a borrower; `minPrice = 0` allowed |
+| R2-02 | Medium | No minimum position size: a one-base-unit debt doubled after one second, sat in a band neither path could clear, and a $0.000002 loss froze the whole bank | Fixed: `MIN_DEBT_USD` ($1) per account and reserve on borrow; losses at or below `LOSS_FREEZE_USD` ($1) per reserve are recorded without halting |
+| R2-03 | Medium | Oracle guardian immutable and wired as the timelock canceller, so one key could hold liquidations closed forever | Fixed: single-use, time-boxed guardian pause (default 2 days, governance-settable 2–30 days), governance `setGuardian` on the oracle, rehearsal rejects veto == guardian |
+| R2-04 | Medium | Oracle `maxAge` capped at exactly one day with no grace, equal to the selected USDT/USD heartbeat | Fixed: bound raised to 48 hours; operators configure heartbeat plus grace |
+| R2-05 | Low | Debt-free depositor can fill the shared supply cap and block an indebted borrower's top-up | Reproduced, not changed: exempting indebted accounts would let any $1 debt bypass the cap; documented as cap-sizing duty |
+| R2-06 | Low | Seizure values debt at the high feed and collateral at the low feed, so the realized premium exceeds the nominal bonus under feed disagreement | Reproduced, not changed: conservative-side pricing is deliberate; documented with the premium formula and a small-deviation recommendation |
+| R2-07 | Low | Collateral-limited dust sweep skipped when the seizure floors to zero, leaving a position no path could clear | Fixed: the sweep no longer requires a nonzero computed seizure; regression added |
+| R2-08 | Low | Risk-parameter cuts apply atomically on permissionless execution, so a searcher chooses the block and liquidates in the same transaction | Reproduced, not changed: standard timelock property; scheduled calldata is public notice; documented |
+| R2-09 | Low | Frontend projection omitted the LTV capacity check, so a projection shown as safe was rejected on chain | Fixed: projection and review apply `ltvBps` capacity and show the real boundary |
+| R2-10 | Info | Public HTTPS deployment absent | Unchanged: hosting credentials and a confirmed deployment address set are not available to this assignment; documented as an open release item |
+
+### R2-01: one-directional price bounds
+
+Collateral feeds reject only `high > maxPrice`; debt feeds reject only `low < minPrice`. Agreement, staleness, decimals, sign and round checks are unchanged. The proof configures a $5 floor for IMD, crashes both feeds to $4 and liquidates successfully; `test_boundsRejectOnlyBorrowerOvervaluation` covers all four directions and the zero floor.
+
+### R2-02: minimum debt and dust-loss policy
+
+`borrow` reverts `MinimumDebt` unless the account's debt in that reserve is worth at least $1 afterwards; top-ups above the minimum are unrestricted. Positions can still shrink below $1 through repayment or liquidation. A write-off now compares the reserve's cumulative recorded loss to `LOSS_FREEZE_USD` at the debt-side price: above it the reserve enters `lossHalted`, the reserve and the bank freeze, and neither can be unfrozen until the reserve's loss is covered in full; at or below it the loss is recorded and coverable without any halt. `testAudit_minimumDebtAndDustLossDoNotHaltLending` walks the repay-then-withdraw path to a one-unit position, finalizes it as dust, and verifies lending continues; `test_lossRecognitionRecapitalizationAndRestart` verifies the halt, the rejection of partial cover and the full-cover restart; the invariant suite asserts the halt whenever recorded USDC loss exceeds $1.
+
+### R2-03: bounded emergency powers
+
+The oracle guardian can pause an enabled feed once per governance decision for `guardianPause` seconds; the pause expires without governance action and the guardian cannot repeat it until governance re-enables or reconfigures the feed. Governance disables are indefinite. `RiskOracle.setGuardian` mirrors the bank. `DeployMainnet` now takes three distinct multisigs and refuses a canceller equal to the guardian, and asserts `guardianPause >= delay`. Residual trust: a guardian can still freeze the bank indefinitely (borrowing and debt-bearing withdrawals), which governance reverses through the timelock; because the veto key is distinct, that reversal cannot be blocked by the guardian alone. A guardian pause that governance ignores lapses, so governance negligence is the remaining way a broken feed goes live again.
+
+### R2-04: feed age bound
+
+`MAX_AGE` is 48 hours. The proof configures USDT with a 25-hour bound, warps one minute past the 24-hour heartbeat and liquidates. Operators remain responsible for heartbeat-plus-grace values per feed.
+
+### Advisories kept as design
+
+R2-05, R2-06 and R2-08 were reproduced in scratch tests with the reviewer's numbers (cap filled and withdrawn after liquidation; 191.25 IMD seized for 1,250 USDC at 20% feed spread; healthy position liquidated in the execution transaction). Each has a documented trade-off in [ARCHITECTURE.md](ARCHITECTURE.md) rather than a code change, because the proposed mitigations either weaken a protection (cap bypass for indebted accounts) or require changing the oracle interface or the timelock's permissionless execution.
 
 ### M-01: caller-selected interest compounding
 
@@ -46,7 +83,7 @@ The monetary amount is tiny, but restarting borrowing requires governance action
 
 ### M-05: genuine microscopic losses still stop all lending
 
-This remaining behavior is explicitly retained to prioritize recognition of any insolvency over availability. Supply `4e11` IMD at $10 and borrow one USDC native unit ($0.000001). A move to $2.40 values the collateral at $0.00000096, too little to repay even one unit including bonus. Finalization correctly records one unit of loss and freezes the entire bank. The economic loss is genuine, but the global outage can cost much more than the loss; repeated tiny positions can prolong it. `testAudit_actualTinyLossTriggersGlobalSafetyHalt` quantifies the behavior. Operators need loss monitoring, recapitalization and timelock response procedures; minimum economical position sizes or a separately reviewed dust-loss policy remain possible future mitigations. This item is not represented as resolved.
+Originally retained to prioritize recognition of any insolvency over availability: supply `4e11` IMD at $10 and borrow one USDC native unit ($0.000001); a move to $2.40 values the collateral at $0.00000096, too little to repay even one unit including bonus; finalization recorded one unit of loss and froze the entire bank. The second review round (R2-02) showed the band is reachable with a 51% move because ceil rounding doubles a one-share debt, and that permissionless finalization could be timed to make a scheduled unfreeze fail. The behavior is now replaced by the minimum-debt and dust-loss policy described under R2-02; the former regression is rewritten as `testAudit_minimumDebtAndDustLossDoNotHaltLending`.
 
 ## Reviewed security properties and remaining assumptions
 
@@ -66,7 +103,7 @@ This remaining behavior is explicitly retained to prioritize recognition of any 
 
 ## Verification evidence and limitations
 
-Independent command: `forge test --match-contract IndependentAuditTest -vv`. After M-01/M-02/M-04 repairs: **9 passed, 0 failed**. One case quantifies the retained M-05 safety-halt limitation; passing it does not mean the availability limitation disappeared. Tests use no environment variables or network. A subsequent full `forge test` run completed with **47 passed, 0 failed**, including 512-run fuzz cases and 128 invariant runs / 8,192 handler calls. `forge build` and the bytecode policy checker passed. [`independent-review-checks.json`](evidence/independent-review-checks.json) records the reviewed compiler runtime templates and exact limits; later integration changes require revalidation.
+Independent command: `forge test --match-contract IndependentAuditTest -vv`. After M-01/M-02/M-04 repairs: **9 passed, 0 failed**; after the second round the suite has **10 passed, 0 failed**, including the rewritten M-05/R2-02 case and the R2-07 regression. Tests use no environment variables or network. The full `forge test` run after the second round completed with **52 passed, 0 failed**, including 512-run fuzz cases and 128 invariant runs / 8,192 handler calls, and the four reviewer proofs pass when copied under `test/scratch/`. `forge build`, `forge fmt --check` and the bytecode policy checker passed. [`independent-review-checks.json`](evidence/independent-review-checks.json) records the reviewed compiler runtime templates and exact limits; later integration changes require revalidation.
 
 The integration owner ran compiler lint and `tools/check_bytecode.py`, which validates deployed sizes and excludes forbidden opcodes while skipping PUSH data. Slither and Mythril were unavailable and **were not run**. Manual review, compiler lint, a bytecode policy check and economic simulations do not substitute for those named analyzers. Likewise, a mainnet fork using mock prices proves token/accounting integration, not a trustworthy live IMD oracle. The overall test/fork/browser report is maintained separately by the integration owner.
 

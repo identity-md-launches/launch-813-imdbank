@@ -1,6 +1,6 @@
 import { BrowserProvider, JsonRpcProvider, Contract, Interface, keccak256, formatUnits, MaxUint256 } from './vendor/ethers-6.15.0.min.js';
 import { bankAbi, tokenAbi, oracleAbi } from './abi.js';
-import { address, validateConfig, checkTokenMetadata, parseAmount, units, usd, hf, short, projectedHealth, errorText, assertWalletContext, USD, RAY } from './core.js';
+import { address, validateConfig, checkTokenMetadata, parseAmount, units, usd, hf, short, projectedPosition, errorText, assertWalletContext, USD, RAY } from './core.js';
 
 const $ = (selector) => document.querySelector(selector);
 const $$ = (selector) => [...document.querySelectorAll(selector)];
@@ -113,8 +113,8 @@ async function refresh() {
     const blockTag = block.number;
     await verifyDeployment(blockTag);
     const read = { blockTag };
-    const [ltv, threshold, bonus, closeFactor, supplyCap, frozen, governor, guardian] = await Promise.all([
-      state.bank.ltvBps(read), state.bank.liquidationThresholdBps(read), state.bank.liquidationBonusBps(read), state.bank.closeFactorBps(read), state.bank.supplyCap(read), state.bank.frozen(read), state.bank.governor(read), state.bank.guardian(read),
+    const [ltv, threshold, bonus, closeFactor, supplyCap, frozen, governor, guardian, minDebtUsd, lossFreezeUsd] = await Promise.all([
+      state.bank.ltvBps(read), state.bank.liquidationThresholdBps(read), state.bank.liquidationBonusBps(read), state.bank.closeFactorBps(read), state.bank.supplyCap(read), state.bank.frozen(read), state.bank.governor(read), state.bank.guardian(read), state.bank.MIN_DEBT_USD(read), state.bank.LOSS_FREEZE_USD(read),
     ]);
     const assets = {};
     await Promise.all(symbols.map(async (symbol) => {
@@ -133,7 +133,7 @@ async function refresh() {
     const account = state.account ? await safe(() => state.bank.accountData(state.account, read)) : null;
     const [supplied, enabled] = state.account ? await Promise.all([state.bank.collateralBalance(state.account, read), state.bank.collateralEnabled(state.account, read)]) : [null, false];
     if (generation !== state.generation) return;
-    state.snapshot = { block: block.number, timestamp: block.timestamp, loadedAt: Date.now(), ltv, threshold, bonus, closeFactor, supplyCap, frozen, governor, guardian, assets, account, supplied, enabled };
+    state.snapshot = { block: block.number, timestamp: block.timestamp, loadedAt: Date.now(), ltv, threshold, bonus, closeFactor, supplyCap, frozen, governor, guardian, minDebtUsd, lossFreezeUsd, assets, account, supplied, enabled };
     state.verified = true;
     render();
   } catch (error) {
@@ -186,7 +186,7 @@ function renderPosition() {
 function renderRisk() {
   const s = state.snapshot;
   $('#risk-deployment').textContent = state.verified ? `Runtime hashes matched at block ${s.block}. This does not establish production readiness. ${state.config.researchStatus}` : 'No deployment is currently verified. Production activation remains blocked.';
-  const rows = s ? [ ['Loan-to-value limit', pct(s.ltv)], ['Liquidation threshold', pct(s.threshold)], ['Liquidation bonus', pct(s.bonus)], ['Close factor', pct(s.closeFactor)], ['IMD supply cap', `${units(s.supplyCap, s.assets.IMD.decimals)} IMD`], ['Global risk freeze', s.frozen ? 'Active' : 'Inactive'], ['IMD oracle', s.assets.IMD.price == null ? 'Unavailable / rejected by oracle' : usd(s.assets.IMD.price)], ['Guardian', short(s.guardian)], ['Governor', short(s.governor)] ] : [['Status','Awaiting verified deployment']];
+  const rows = s ? [ ['Loan-to-value limit', pct(s.ltv)], ['Liquidation threshold', pct(s.threshold)], ['Liquidation bonus', pct(s.bonus)], ['Close factor', pct(s.closeFactor)], ['IMD supply cap', `${units(s.supplyCap, s.assets.IMD.decimals)} IMD`], ['Minimum debt per asset', usd(s.minDebtUsd)], ['Loss halt threshold per reserve', usd(s.lossFreezeUsd)], ['Global risk freeze', s.frozen ? 'Active' : 'Inactive'], ['IMD oracle', s.assets.IMD.price == null ? 'Unavailable / rejected by oracle' : usd(s.assets.IMD.price)], ['Guardian', short(s.guardian)], ['Governor', short(s.governor)] ] : [['Status','Awaiting verified deployment']];
   $('#risk-parameters').innerHTML = rows.map(([name,value]) => `<div><dt>${escape(name)}</dt><dd>${escape(value)}</dd></div>`).join('');
   $('#liquidation-risk').innerHTML = (s ? rows.slice(1,4) : rows).map(([name,value]) => `<div><dt>${escape(name)}</dt><dd>${escape(value)}</dd></div>`).join('');
 }
@@ -213,9 +213,10 @@ function updateQuotes() {
     try {
       const amount = parseAmount(form.elements.amount.value, a.decimals);
       if (!s.account || a.price == null) { output.textContent = 'Oracle valuation unavailable. Repayments remain available subject to contract simulation; risk-increasing actions fail closed.'; continue; }
-      const projected = projectedHealth({collateralUsd:s.account.collateralUsd,debtUsd:s.account.debtUsd,liquidationBps:s.threshold,action:form.dataset.action,amount,decimals:a.decimals,price:a.price,enabled:s.enabled,assetDebt:a.debt});
-      output.textContent = `Projected health factor: ${hf(projected)} · Oracle value: ${usd(amount * a.price / 10n ** BigInt(a.decimals))}. Estimate excludes price movement, accrued interest after this block, rounding dust and other pending transactions. The contract rechecks at execution.`;
-      output.classList.toggle('danger-text', projected != null && projected < USD);
+      const projected = projectedPosition({collateralUsd:s.account.collateralUsd,debtUsd:s.account.debtUsd,liquidationBps:s.threshold,ltvBps:s.ltv,action:form.dataset.action,amount,decimals:a.decimals,price:a.price,enabled:s.enabled,assetDebt:a.debt});
+      const limit = projected?.exceedsCapacity ? ` Projected debt ${usd(projected.debtUsd)} exceeds the loan-to-value borrowing limit ${usd(projected.capacityUsd)}; the contract will reject this action.` : '';
+      output.textContent = `Projected health factor: ${hf(projected?.health)} · Oracle value: ${usd(amount * a.price / 10n ** BigInt(a.decimals))}.${limit} Estimate excludes price movement, accrued interest after this block, rounding dust and other pending transactions. The contract rechecks at execution.`;
+      output.classList.toggle('danger-text', projected != null && (projected.health < USD || projected.exceedsCapacity));
     } catch (error) { output.textContent = errorText(error); }
   }
 }
@@ -269,7 +270,11 @@ function review(request) {
     if (request.action === 'revoke') rows.push(['Approval',`Set ${request.symbol} allowance to zero`]);
     if (request.action === 'liquidate') rows.push(['Borrower',request.borrower],['Quoted repayment',`${formatUnits(request.quote.repaid,a.decimals)} ${request.symbol}`],['Quoted IMD received',`${formatUnits(request.quote.seized,s.assets.IMD.decimals)} IMD`],['Minimum IMD received',`${formatUnits(request.minimum,s.assets.IMD.decimals)} IMD`]);
     if (request.action === 'donate') rows.push(['Withdrawal claim','NONE. This donation cannot be withdrawn.']);
-    if (s.account && a.price != null && ['supply','borrow','repay','withdraw'].includes(request.action)) rows.push(['Estimated resulting health factor', hf(projectedHealth({collateralUsd:s.account.collateralUsd,debtUsd:s.account.debtUsd,liquidationBps:s.threshold,action:request.action,amount:request.amount,decimals:a.decimals,price:a.price,enabled:s.enabled,assetDebt:a.debt}))]);
+    if (s.account && a.price != null && ['supply','borrow','repay','withdraw'].includes(request.action)) {
+      const projected = projectedPosition({collateralUsd:s.account.collateralUsd,debtUsd:s.account.debtUsd,liquidationBps:s.threshold,ltvBps:s.ltv,action:request.action,amount:request.amount,decimals:a.decimals,price:a.price,enabled:s.enabled,assetDebt:a.debt});
+      if (projected.exceedsCapacity) throw new Error(`This action would leave ${usd(projected.debtUsd)} of debt above the loan-to-value borrowing limit of ${usd(projected.capacityUsd)}. The contract rejects it. Refresh if prices or balances changed.`);
+      rows.push(['Estimated resulting health factor', hf(projected.health)], ['Remaining borrowing limit after action', projected.capacityUsd == null ? 'Unavailable' : usd(projected.capacityUsd > projected.debtUsd ? projected.capacityUsd - projected.debtUsd : 0n)]);
+    }
     $('#review-details').innerHTML = `<dl>${rows.map(([k,v])=>`<dt>${escape(k)}</dt><dd>${escape(v)}</dd>`).join('')}</dl>`;
     $('#review-ack').checked = false; $('#review-submit').disabled = true; $('#review-dialog').showModal();
   } catch (error) { showError(error); }

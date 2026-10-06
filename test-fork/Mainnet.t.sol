@@ -28,7 +28,7 @@ contract MainnetIntegrationTest is Test {
     MockOracle oracle;
 
     function setUp() public {
-        require(block.chainid == 1 && block.number == 26_134_012, "requires pinned Ethereum Mainnet fork");
+        require(block.chainid == 1 && block.number == 26_134_418, "requires pinned Ethereum Mainnet fork");
         assertGt(IMD.code.length, 0);
         assertGt(USDC.code.length, 0);
         assertGt(USDT.code.length, 0);

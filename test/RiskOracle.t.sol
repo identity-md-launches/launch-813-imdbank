@@ -103,6 +103,107 @@ contract RiskOracleTest is Test {
         oracle.price(address(123));
     }
 
+    /// @dev R2-01: bounds reject only the direction that would overvalue a borrower, so an agreed
+    /// collateral crash or debt spike is priced as reported and liquidation stays live.
+    function test_boundsRejectOnlyBorrowerOvervaluation() public {
+        a.setAnswer(0.05e8);
+        b.setAnswer(0.05e8);
+        assertEq(oracle.price(address(token)), 0.05e18); // Collateral below the $0.10 floor is accepted.
+        a.setAnswer(11e8);
+        b.setAnswer(11e8);
+        vm.expectRevert(RiskOracle.InvalidPrice.selector); // Collateral above the $10 ceiling rejects.
+        oracle.price(address(token));
+        _configure(false);
+        assertEq(oracle.price(address(token)), 11e18); // Debt above the ceiling is accepted.
+        a.setAnswer(0.05e8);
+        b.setAnswer(0.05e8);
+        vm.expectRevert(RiskOracle.InvalidPrice.selector); // Debt below the floor rejects.
+        oracle.price(address(token));
+        oracle.configure(address(token), address(a), address(b), 1 hours, 1 hours, 1000, 0, 10e18, false);
+        assertEq(oracle.price(address(token)), 0.05e18); // A zero floor means no floor.
+        vm.expectRevert(RiskOracle.InvalidConfiguration.selector);
+        oracle.configure(address(token), address(a), address(b), 1 hours, 1 hours, 1000, 0, 0, false);
+    }
+
+    /// @dev R2-04: governance can configure a heartbeat plus grace of up to two days.
+    function test_ageBoundAllowsHeartbeatPlusGrace() public {
+        vm.expectRevert(RiskOracle.InvalidConfiguration.selector);
+        oracle.configure(
+            address(token), address(a), address(b), 2 days + 1, 1 hours, 1000, 0.1e18, 10e18, true
+        );
+        oracle.configure(
+            address(token), address(a), address(b), 1 days + 1 hours, 2 days, 1000, 0.1e18, 10e18, true
+        );
+        a.setRound(2, 2, block.timestamp - 1 days - 1 hours);
+        b.setRound(2, 2, block.timestamp - 2 days);
+        assertEq(oracle.price(address(token)), 1e18);
+        a.setRound(2, 2, block.timestamp - 1 days - 1 hours - 1);
+        vm.expectRevert(RiskOracle.InvalidPrice.selector);
+        oracle.price(address(token));
+    }
+
+    /// @dev R2-03: a guardian pause is bounded, single-use until governance decides, and governance
+    /// disables are indefinite.
+    function test_guardianPauseExpiresOnceAndGovernanceRearms() public {
+        uint256 start = vm.getBlockTimestamp();
+        vm.prank(GUARDIAN);
+        oracle.setEnabled(address(token), false);
+        vm.expectRevert(RiskOracle.Disabled.selector);
+        oracle.price(address(token));
+        vm.warp(start + 2 days - 1);
+        vm.expectRevert(RiskOracle.Disabled.selector);
+        oracle.price(address(token));
+        vm.warp(start + 2 days);
+        assertEq(oracle.price(address(token)), 1e18);
+        vm.prank(GUARDIAN);
+        vm.expectRevert(RiskOracle.Unauthorized.selector);
+        oracle.setEnabled(address(token), false);
+        oracle.setEnabled(address(token), true);
+        vm.prank(GUARDIAN);
+        oracle.setEnabled(address(token), false);
+        vm.expectRevert(RiskOracle.Disabled.selector);
+        oracle.price(address(token));
+        oracle.setEnabled(address(token), false);
+        vm.warp(start + 60 days);
+        vm.expectRevert(RiskOracle.Disabled.selector);
+        oracle.price(address(token));
+        oracle.setEnabled(address(token), true);
+        assertEq(oracle.price(address(token)), 1e18);
+        _configure(true);
+        vm.prank(GUARDIAN);
+        oracle.setEnabled(address(token), false); // Reconfiguration also re-arms the guardian.
+        vm.expectRevert(RiskOracle.Disabled.selector);
+        oracle.price(address(token));
+    }
+
+    function test_guardianRotationAndPauseBounds() public {
+        vm.prank(GUARDIAN);
+        vm.expectRevert(RiskOracle.Unauthorized.selector);
+        oracle.setGuardian(address(1));
+        vm.expectRevert(RiskOracle.InvalidConfiguration.selector);
+        oracle.setGuardian(address(0));
+        vm.expectRevert(RiskOracle.InvalidConfiguration.selector);
+        oracle.setGuardian(address(this));
+        oracle.setGuardian(address(0xD00D));
+        assertEq(oracle.guardian(), address(0xD00D));
+        vm.prank(GUARDIAN);
+        vm.expectRevert(RiskOracle.Unauthorized.selector);
+        oracle.setEnabled(address(token), false);
+        vm.prank(address(0xD00D));
+        oracle.setEnabled(address(token), false);
+        vm.expectRevert(RiskOracle.Disabled.selector);
+        oracle.price(address(token));
+        vm.prank(address(0xD00D));
+        vm.expectRevert(RiskOracle.Unauthorized.selector);
+        oracle.setGuardianPause(3 days);
+        vm.expectRevert(RiskOracle.InvalidConfiguration.selector);
+        oracle.setGuardianPause(2 days - 1);
+        vm.expectRevert(RiskOracle.InvalidConfiguration.selector);
+        oracle.setGuardianPause(30 days + 1);
+        oracle.setGuardianPause(3 days);
+        assertEq(oracle.guardianPause(), 3 days);
+    }
+
     function testFuzz_agreementAlwaysUsesSafeSide(uint64 rawA, uint64 delta) public {
         uint256 p = bound(uint256(rawA), 10_000_001, 900_000_000);
         uint256 q = p + bound(uint256(delta), 0, p / 10);

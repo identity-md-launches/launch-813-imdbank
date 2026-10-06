@@ -139,7 +139,13 @@ contract BankInvariantTest is BankFixture {
         assertLe(total - aggregate, 2);
         assertGe(index, 1e27);
         assertLe(index, 1e36);
-        (,,,,, uint256 badDebt,) = bank.reserveData(address(usdc));
-        if (badDebt > 0) assertTrue(bank.frozen());
+        (,,,,, uint256 badDebt, bool reserveFrozen) = bank.reserveData(address(usdc));
+        // USDC is pinned at $1 in this fixture: a loss above the halt threshold must freeze everything.
+        if (badDebt * 1e12 > bank.LOSS_FREEZE_USD()) {
+            assertTrue(bank.frozen());
+            assertTrue(reserveFrozen);
+            assertTrue(bank.lossHalted(address(usdc)));
+        }
+        if (badDebt == 0) assertFalse(bank.lossHalted(address(usdc)));
     }
 }

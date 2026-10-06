@@ -55,7 +55,7 @@ export function usd(value) { return value == null ? 'Unavailable' : `$${units(va
 export function hf(value) { return value == null ? 'Unavailable' : value === MaxUint256 ? 'No debt' : units(value, 18, 3); }
 export function short(value) { return value ? `${value.slice(0, 6)}…${value.slice(-4)}` : 'Not deployed'; }
 export function ceilDiv(a, b) { if (b <= 0n) throw new Error('Invalid denominator.'); return (a + b - 1n) / b; }
-export function projectedHealth({ collateralUsd, debtUsd, liquidationBps, action, amount, decimals, price, enabled, assetDebt }) {
+export function projectedPosition({ collateralUsd, debtUsd, liquidationBps, ltvBps, action, amount, decimals, price, enabled, assetDebt }) {
   if (price == null) return null;
   let c = collateralUsd; let d = debtUsd;
   if (action === 'repay' && assetDebt != null && amount > assetDebt) amount = assetDebt;
@@ -65,15 +65,21 @@ export function projectedHealth({ collateralUsd, debtUsd, liquidationBps, action
   if (action === 'withdraw') c = c > deltaUp ? c - deltaUp : 0n;
   if (action === 'borrow') d += deltaUp;
   if (action === 'repay') d = d > deltaDown ? d - deltaDown : 0n;
-  return d === 0n ? MaxUint256 : c * liquidationBps / 10000n * USD / d;
+  const health = d === 0n ? MaxUint256 : c * liquidationBps / 10000n * USD / d;
+  // The contract rejects borrowing and debt-bearing withdrawals above the loan-to-value capacity,
+  // which is stricter than the liquidation threshold used by the health factor.
+  const capacityUsd = ltvBps == null ? null : c * ltvBps / 10000n;
+  const exceedsCapacity = capacityUsd != null && d > 0n && (action === 'borrow' || action === 'withdraw') && d > capacityUsd;
+  return { collateralUsd: c, debtUsd: d, health, capacityUsd, exceedsCapacity };
 }
+export function projectedHealth(input) { const projected = projectedPosition(input); return projected == null ? null : projected.health; }
 export function errorText(error) {
   if (error?.code === 4001 || error?.code === 'ACTION_REJECTED') return 'You rejected the wallet request. No transaction was sent by this step.';
   if (error?.code === 'INSUFFICIENT_FUNDS') return 'Insufficient ETH for network gas.';
   if (error?.code === 'NETWORK_ERROR') return 'The wallet network changed. Reconnect on Ethereum Mainnet and try again.';
   if (error?.code === 'TRANSACTION_REPLACED') return error.cancelled ? 'The transaction was cancelled or replaced. Refresh your position before retrying.' : 'The transaction was replaced. Refresh to check its final state.';
   const reason = error?.revert?.name || error?.reason || error?.shortMessage || error?.message || 'The request could not be completed.';
-  const messages = { Unauthorized: 'This action requires a governance role your wallet does not hold.', Frozen: 'This action is disabled by an emergency freeze or unresolved bad debt.', CapExceeded: 'This action exceeds an on-chain supply or borrowing cap.', InsufficientLiquidity: 'The reserve does not have enough available liquidity.', UnsafePosition: 'This action would leave the account above its allowed borrowing limit.', HealthyPosition: 'This account is healthy and cannot be liquidated.', InvalidPrice: 'The price oracle is unavailable, stale or outside its safety bounds.', Dust: 'This amount is too small after debt-share rounding.', Expired: 'The liquidation deadline expired. Review a fresh quote.', Slippage: 'The liquidation would return less IMD than your chosen minimum.', InvalidAmount: 'The contract rejected this amount.', OutstandingBadDebt: 'Unresolved bad debt prevents this risk setting from being changed.' };
+  const messages = { Unauthorized: 'This action requires a governance role your wallet does not hold.', Frozen: 'This action is disabled by an emergency freeze or unresolved bad debt.', CapExceeded: 'This action exceeds an on-chain supply or borrowing cap.', InsufficientLiquidity: 'The reserve does not have enough available liquidity.', UnsafePosition: 'This action would leave the account above its allowed borrowing limit.', HealthyPosition: 'This account is healthy and cannot be liquidated.', InvalidPrice: 'The price oracle is unavailable, stale or outside its safety bounds.', Dust: 'This amount is too small after debt-share rounding.', Expired: 'The liquidation deadline expired. Review a fresh quote.', Slippage: 'The liquidation would return less IMD than your chosen minimum.', InvalidAmount: 'The contract rejected this amount.', OutstandingBadDebt: 'Unresolved bad debt prevents this risk setting from being changed.', MinimumDebt: 'Your debt in this asset must be at least $1 after borrowing. Borrow more or nothing.' };
   if (messages[reason]) return messages[reason];
   if (/user rejected|user denied/i.test(reason)) return 'You rejected the wallet request.';
   if (/missing revert data|execution reverted/i.test(reason)) return 'The contract rejected this action. Check caps, oracle freshness, liquidity, allowance and your health factor. No action was submitted if simulation failed.';

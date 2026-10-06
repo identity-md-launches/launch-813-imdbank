@@ -25,7 +25,7 @@ The default tests are deterministic and need no network, environment variables, 
 Optional real-token Mainnet integration uses a separate profile so offline verification remains complete:
 
 ```sh
-FOUNDRY_PROFILE=fork forge test --fork-url https://eth.blockrazor.xyz --fork-block-number 26134012 -vv
+FOUNDRY_PROFILE=fork forge test --fork-url https://eth.blockrazor.xyz --fork-block-number 26134418 -vv
 ```
 
 This test requires the pinned block and fails if it is not a valid fork. It uses actual Mainnet token contracts and real Chainlink feed reads, with a deliberately simulated IMD valuation. See [validation](docs/VALIDATION.md) for exactly what was executed and its limitations.
@@ -50,4 +50,4 @@ Deploy `web/` as static HTTPS content following [the hosting and deployment hand
 - [Frontend implementation and limitations](docs/FRONTEND.md).
 - [Vendored dependency provenance](docs/DEPENDENCIES.md).
 
-Application contracts are `src/IMDBank.sol`, `src/RiskOracle.sol`, and `src/GovernanceTimelock.sol`. `script/DeployMainnet.s.sol` is a no-broadcast rehearsal helper taking explicit role addresses; it never reads keys. The launch service should use the three individual application artifacts and supply verified governance configuration.
+Application contracts are `src/IMDBank.sol`, `src/RiskOracle.sol`, and `src/GovernanceTimelock.sol`. `script/DeployMainnet.s.sol` is a no-broadcast rehearsal helper taking three explicit, distinct role addresses (governance proposer, timelock veto, emergency guardian); it never reads keys. The launch service should use the three individual application artifacts and supply verified governance configuration.

@@ -1,38 +1,73 @@
 No files changed, compilation skipped
 
-Ran 7 tests for test/RiskControls.t.sol:RiskControlsTest
-[PASS] test_capReductionCannotBlockRepayment() (gas: 676247)
-[PASS] test_hardRiskBoundsCannotBeBypassedByGovernor() (gas: 154047)
-[PASS] test_liquidityExhaustionRevertsWithoutMintingDebt() (gas: 318099)
-[PASS] test_lossRecognitionRecapitalizationAndRestart() (gas: 990244)
-[PASS] test_multiReserveDebtWrittenOffAfterCollateralExhausted() (gas: 1299263)
-[PASS] test_permissionlessLiquidationFitsGasBudget() (gas: 605718)
-[PASS] test_tokenBalanceDonationCannotRetroactivelyChangeRate() (gas: 491413)
-Suite result: ok. 7 passed; 0 failed; 0 skipped; finished in 5.20ms (3.17ms CPU time)
-
-Ran 9 tests for test/Audit.t.sol:IndependentAuditTest
-[PASS] testAudit_actualTinyLossTriggersGlobalSafetyHalt() (gas: 771740)
-[PASS] testAudit_checkpointFrequencyCannotMateriallyChangeBorrowerDebt() (gas: 22765073)
-[PASS] testAudit_collateralCallbackCannotLiquidateOrBorrow() (gas: 328890)
-[PASS] testAudit_dustFinalizationRejectsHealthyValuableAndInvalidPrice() (gas: 421454)
-[PASS] testAudit_dustTransferFailureRollsBackWriteoff() (gas: 397286)
-[PASS] testAudit_extremeCollapseRecordsBadDebt() (gas: 332121)
-[PASS] testAudit_insolventButPartlyRecoverableDustMustLiquidateFirst() (gas: 254035)
-[PASS] testAudit_oracleConfigurationRollsBackIfBroken() (gas: 1029291)
-[PASS] testAudit_smallRecoverablePositionCannotTriggerGlobalFreeze() (gas: 970961)
-Suite result: ok. 9 passed; 0 failed; 0 skipped; finished in 25.31ms (23.79ms CPU time)
-
 Ran 2 tests for test/DeploymentRehearsal.t.sol:DeploymentRehearsalTest
-[PASS] test_explicitRolesFromFactoryLikeCallerAndTimelockedRisk() (gas: 11710046)
-[PASS] test_wrongChainAndEOARolesRejected() (gas: 5110289)
-Suite result: ok. 2 passed; 0 failed; 0 skipped; finished in 1.33ms (949.91µs CPU time)
+[PASS] test_explicitRolesFromFactoryLikeCallerAndTimelockedRisk() (gas: 12475338)
+[PASS] test_wrongChainEOAAndSharedRolesRejected() (gas: 5798019)
+Suite result: ok. 2 passed; 0 failed; 0 skipped; finished in 3.46ms (3.96ms CPU time)
+
+Ran 7 tests for test/RiskControls.t.sol:RiskControlsTest
+[PASS] test_capReductionCannotBlockRepayment() (gas: 675227)
+[PASS] test_hardRiskBoundsCannotBeBypassedByGovernor() (gas: 154202)
+[PASS] test_liquidityExhaustionRevertsWithoutMintingDebt() (gas: 315876)
+[PASS] test_lossRecognitionRecapitalizationAndRestart() (gas: 1174412)
+[PASS] test_multiReserveDebtWrittenOffAfterCollateralExhausted() (gas: 1309899)
+[PASS] test_permissionlessLiquidationFitsGasBudget() (gas: 606658)
+[PASS] test_tokenBalanceDonationCannotRetroactivelyChangeRate() (gas: 492373)
+Suite result: ok. 7 passed; 0 failed; 0 skipped; finished in 11.02ms (7.13ms CPU time)
 
 Ran 4 tests for test/GovernanceTimelock.t.sol:GovernanceTimelockTest
 [PASS] test_cancellationAndAccess() (gas: 210103)
 [PASS] test_delayPermissionlessExecutionAndReplay() (gas: 266474)
 [PASS] test_domainSeparation() (gas: 22790)
 [PASS] test_expiryAndFailureAtomicity() (gas: 200959)
-Suite result: ok. 4 passed; 0 failed; 0 skipped; finished in 480.46µs (308.77µs CPU time)
+Suite result: ok. 4 passed; 0 failed; 0 skipped; finished in 835.96ms (2.35ms CPU time)
+
+Ran 10 tests for test/Audit.t.sol:IndependentAuditTest
+[PASS] testAudit_checkpointFrequencyCannotMateriallyChangeBorrowerDebt() (gas: 22740804)
+[PASS] testAudit_collateralCallbackCannotLiquidateOrBorrow() (gas: 328999)
+[PASS] testAudit_dustFinalizationRejectsHealthyValuableAndInvalidPrice() (gas: 421477)
+[PASS] testAudit_dustTransferFailureRollsBackWriteoff() (gas: 399889)
+[PASS] testAudit_extremeCollapseRecordsBadDebt() (gas: 334702)
+[PASS] testAudit_insolventButPartlyRecoverableDustMustLiquidateFirst() (gas: 253994)
+[PASS] testAudit_minimumDebtAndDustLossDoNotHaltLending() (gas: 1887540)
+[PASS] testAudit_oracleConfigurationRollsBackIfBroken() (gas: 1030185)
+[PASS] testAudit_seizureFlooringToZeroStillSweepsResidue() (gas: 1625768)
+[PASS] testAudit_smallRecoverablePositionCannotTriggerGlobalFreeze() (gas: 971931)
+Suite result: ok. 10 passed; 0 failed; 0 skipped; finished in 836.34ms (38.77ms CPU time)
+
+Ran 11 tests for test/RiskOracle.t.sol:RiskOracleTest
+[PASS] testFuzz_agreementAlwaysUsesSafeSide(uint64,uint64) (runs: 10000, μ: 335552, ~: 335333)
+[PASS] test_ageBoundAllowsHeartbeatPlusGrace() (gas: 347389)
+[PASS] test_ageBoundaryAndCircuitBreaker() (gas: 271627)
+[PASS] test_boundsRejectOnlyBorrowerOvervaluation() (gas: 637518)
+[PASS] test_conservativeDirectionAndDecimals() (gas: 326271)
+[PASS] test_depegIsPricedNotAssumedOneDollar() (gas: 194740)
+[PASS] test_feedDecimalsCannotSilentlyChange() (gas: 66330)
+[PASS] test_governanceAndGuardianSeparation() (gas: 265582)
+[PASS] test_guardianPauseExpiresOnceAndGovernanceRearms() (gas: 603417)
+[PASS] test_guardianRotationAndPauseBounds() (gas: 303376)
+[PASS] test_rejectsBadRoundsAndTimes() (gas: 471463)
+Suite result: ok. 11 passed; 0 failed; 0 skipped; finished in 836.56ms (839.66ms CPU time)
+
+Ran 17 tests for test/IMDBank.t.sol:IMDBankTest
+[PASS] testFuzz_borrowRepayRoundingCannotCreateAssets(uint64,uint32) (runs: 10000, μ: 567775, ~: 567702)
+[PASS] testFuzz_roundTripNoCollateralGain(uint96) (runs: 10000, μ: 222867, ~: 222717)
+[PASS] test_completeLifecycleThreeReserves() (gas: 1433109)
+[PASS] test_flashSupplyBorrowWithdrawCannotEscapeDebt() (gas: 483863)
+[PASS] test_guardianCannotUnfreezeOrChangeRisk() (gas: 759157)
+[PASS] test_initialDeploymentCannotTakeRisk() (gas: 125584)
+[PASS] test_liquidationSlippageAndExpiryProtectPayer() (gas: 575358)
+[PASS] test_noReturnTokensWorkAndFalseReturnRejected() (gas: 621499)
+[PASS] test_oracleOutageStillAllowsRepaymentAndDebtFreeExit() (gas: 764020)
+[PASS] test_partialRepayNeverReducesDebtMoreThanPayment() (gas: 568911)
+[PASS] test_priceDropLiquidationAndCloseFactor() (gas: 868219)
+[PASS] test_reentrancyTransferCallbackCannotMintUnbackedReceipts() (gas: 313788)
+[PASS] test_rejectsOverborrowWithdrawalAndCollateralDisable() (gas: 739314)
+[PASS] test_safeHealthRejectsLiquidation() (gas: 489468)
+[PASS] test_stablecoinDepegAndWethSpikeChangeDebtValue() (gas: 782234)
+[PASS] test_supplyOnBehalfDoesNotEnableOthersCollateral() (gas: 173849)
+[PASS] test_taxedTransfersFailAtomicallyInAndOut() (gas: 773562)
+Suite result: ok. 17 passed; 0 failed; 0 skipped; finished in 836.92ms (1.66s CPU time)
 
 Ran 1 test for test/Invariants.t.sol:BankInvariantTest
 [PASS]
@@ -45,51 +80,21 @@ BankInvariantTest invariants:
 ╭-------------+-------------------+-------+---------+----------╮
 | Contract    | Selector          | Calls | Reverts | Discards |
 +==============================================================+
-| BankHandler | borrow            | 1187  | 0       | 0        |
+| BankHandler | borrow            | 1178  | 0       | 0        |
 |-------------+-------------------+-------+---------+----------|
-| BankHandler | donate            | 1157  | 0       | 0        |
+| BankHandler | donate            | 1150  | 0       | 0        |
 |-------------+-------------------+-------+---------+----------|
-| BankHandler | elapse            | 1169  | 0       | 0        |
+| BankHandler | elapse            | 1190  | 0       | 0        |
 |-------------+-------------------+-------+---------+----------|
-| BankHandler | repay             | 1177  | 0       | 0        |
+| BankHandler | repay             | 1199  | 0       | 0        |
 |-------------+-------------------+-------+---------+----------|
-| BankHandler | shockAndLiquidate | 1103  | 0       | 0        |
+| BankHandler | shockAndLiquidate | 1124  | 0       | 0        |
 |-------------+-------------------+-------+---------+----------|
-| BankHandler | supply            | 1224  | 0       | 0        |
+| BankHandler | supply            | 1198  | 0       | 0        |
 |-------------+-------------------+-------+---------+----------|
-| BankHandler | withdraw          | 1175  | 0       | 0        |
+| BankHandler | withdraw          | 1153  | 0       | 0        |
 ╰-------------+-------------------+-------+---------+----------╯
 
-Suite result: ok. 1 passed; 0 failed; 0 skipped; finished in 2.17s (2.17s CPU time)
+Suite result: ok. 1 passed; 0 failed; 0 skipped; finished in 2.07s (2.06s CPU time)
 
-Ran 7 tests for test/RiskOracle.t.sol:RiskOracleTest
-[PASS] testFuzz_agreementAlwaysUsesSafeSide(uint64,uint64) (runs: 10000, μ: 334605, ~: 334401)
-[PASS] test_ageBoundaryAndCircuitBreaker() (gas: 271330)
-[PASS] test_conservativeDirectionAndDecimals() (gas: 325304)
-[PASS] test_depegIsPricedNotAssumedOneDollar() (gas: 194230)
-[PASS] test_feedDecimalsCannotSilentlyChange() (gas: 66234)
-[PASS] test_governanceAndGuardianSeparation() (gas: 251828)
-[PASS] test_rejectsBadRoundsAndTimes() (gas: 470682)
-Suite result: ok. 7 passed; 0 failed; 0 skipped; finished in 2.49s (2.49s CPU time)
-
-Ran 17 tests for test/IMDBank.t.sol:IMDBankTest
-[PASS] testFuzz_borrowRepayRoundingCannotCreateAssets(uint64,uint32) (runs: 10000, μ: 565961, ~: 564745)
-[PASS] testFuzz_roundTripNoCollateralGain(uint96) (runs: 10000, μ: 222849, ~: 222695)
-[PASS] test_completeLifecycleThreeReserves() (gas: 1429741)
-[PASS] test_flashSupplyBorrowWithdrawCannotEscapeDebt() (gas: 482815)
-[PASS] test_guardianCannotUnfreezeOrChangeRisk() (gas: 758192)
-[PASS] test_initialDeploymentCannotTakeRisk() (gas: 125602)
-[PASS] test_liquidationSlippageAndExpiryProtectPayer() (gas: 574550)
-[PASS] test_noReturnTokensWorkAndFalseReturnRejected() (gas: 620428)
-[PASS] test_oracleOutageStillAllowsRepaymentAndDebtFreeExit() (gas: 764952)
-[PASS] test_partialRepayNeverReducesDebtMoreThanPayment() (gas: 567950)
-[PASS] test_priceDropLiquidationAndCloseFactor() (gas: 867321)
-[PASS] test_reentrancyTransferCallbackCannotMintUnbackedReceipts() (gas: 313832)
-[PASS] test_rejectsOverborrowWithdrawalAndCollateralDisable() (gas: 740270)
-[PASS] test_safeHealthRejectsLiquidation() (gas: 488508)
-[PASS] test_stablecoinDepegAndWethSpikeChangeDebtValue() (gas: 780072)
-[PASS] test_supplyOnBehalfDoesNotEnableOthersCollateral() (gas: 173849)
-[PASS] test_taxedTransfersFailAtomicallyInAndOut() (gas: 772536)
-Suite result: ok. 17 passed; 0 failed; 0 skipped; finished in 4.01s (4.02s CPU time)
-
-Ran 7 test suites in 4.02s (8.70s CPU time): 47 tests passed, 0 failed, 0 skipped (47 total tests)
+Ran 7 test suites in 2.07s (5.43s CPU time): 52 tests passed, 0 failed, 0 skipped (52 total tests)

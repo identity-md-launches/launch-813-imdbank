@@ -1,10 +1,10 @@
 {
-  "reviewed_at_utc": "2026-10-06T15:08:09.593420+00:00",
+  "reviewed_at_utc": "2026-10-06T16:06:16.979008+00:00",
   "compiler": "0.8.26",
   "build": "forge build passed with heuristic lint warnings triaged in SECURITY_REVIEW.md",
   "default_tests": {
     "command": "forge test",
-    "passed": 47,
+    "passed": 52,
     "failed": 0,
     "skipped": 0,
     "fuzz_runs": 512,
@@ -13,7 +13,7 @@
   },
   "independent_tests": {
     "command": "forge test --match-contract IndependentAuditTest -vv",
-    "passed": 9,
+    "passed": 10,
     "failed": 0
   },
   "bytecode_policy": "python3 tools/check_bytecode.py passed for all three application contracts",
@@ -23,13 +23,13 @@
   },
   "runtime_templates": {
     "IMDBank": {
-      "bytes": 12360,
-      "sha256_binary": "2bba0bf5fafe15c51e3622468fcc5b5feb2d0878648d069f393d2a4bb6ff1e46",
+      "bytes": 12683,
+      "sha256_binary": "bf77fb505d8b0234bf3af1e27ecf62717498645515c24085cd0c7189b44ef5b5",
       "note": "Compiler artifact runtime template; immutable constructor values are placeholders. This is not a deployed onchain code hash."
     },
     "RiskOracle": {
-      "bytes": 4266,
-      "sha256_binary": "fe219a52110a459cd8a534c794f465b7c3a488bb192a70e5a3e263e67138c4c1",
+      "bytes": 5168,
+      "sha256_binary": "9ac104d96afbed785912b3d0fbe435e51d26bfb54fc645f32438e64364d37191",
       "note": "Compiler artifact runtime template; immutable constructor values are placeholders. This is not a deployed onchain code hash."
     },
     "GovernanceTimelock": {
@@ -37,5 +37,11 @@
       "sha256_binary": "3929a1e5dc3d67836790343d2e824cac2d6a66d191b80a757000a7161594a3df",
       "note": "Compiler artifact runtime template; immutable constructor values are placeholders. This is not a deployed onchain code hash."
     }
+  },
+  "second_round_proofs": {
+    "command": "forge test --match-path 'test/scratch/Proof_*'",
+    "passed": 4,
+    "failed": 0,
+    "note": "Reviewer proofs copied under test/scratch/; each failed on the accepted tree and passes on the revised tree."
   }
 }

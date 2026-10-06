@@ -11,20 +11,28 @@ interface IDeploymentToken {
 
 /// @notice Deterministic-parameter rehearsal helper. Does not broadcast or read wallet/environment data.
 /// @dev The launch service deploys the three applications directly from their individual artifacts.
+/// Three distinct multisigs are required: the timelock canceller must not be the emergency guardian,
+/// otherwise one key could both pause and veto every governance reversal of that pause.
 contract DeployMainnet {
     address public constant IMD = 0xD34a99Bc0f67aE1bbd63C660e6d0b0dd03E263B7;
     address public constant USDC = 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48;
     address public constant USDT = 0xdAC17F958D2ee523a2206206994597C13D831ec7;
     address public constant WETH = 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2;
+    uint256 public constant TIMELOCK_DELAY = 2 days;
 
-    function deploy(address governanceMultisig, address emergencyMultisig)
+    function deploy(address governanceMultisig, address vetoMultisig, address emergencyMultisig)
         external
         returns (GovernanceTimelock timelock, RiskOracle oracle, IMDBank bank)
     {
         require(block.chainid == 1, "Ethereum Mainnet only");
-        require(governanceMultisig != emergencyMultisig, "separate roles required");
         require(
-            governanceMultisig.code.length > 0 && emergencyMultisig.code.length > 0,
+            governanceMultisig != vetoMultisig && governanceMultisig != emergencyMultisig
+                && vetoMultisig != emergencyMultisig,
+            "separate roles required"
+        );
+        require(
+            governanceMultisig.code.length > 0 && vetoMultisig.code.length > 0
+                && emergencyMultisig.code.length > 0,
             "multisig contracts required"
         );
         require(
@@ -32,10 +40,12 @@ contract DeployMainnet {
                 && IDeploymentToken(USDT).decimals() == 6 && IDeploymentToken(WETH).decimals() == 18,
             "unexpected token units"
         );
-        timelock = new GovernanceTimelock(governanceMultisig, emergencyMultisig, 2 days);
+        timelock = new GovernanceTimelock(governanceMultisig, vetoMultisig, TIMELOCK_DELAY);
         oracle = new RiskOracle(address(timelock), emergencyMultisig);
         bank = new IMDBank(address(timelock), emergencyMultisig, IMD, address(oracle), USDC, USDT, WETH);
         // Complete, intentionally inactive constructor state: no post-deploy initializer or owner handover.
         require(bank.supplyCap() == 0 && bank.frozen(), "activation gate violated");
+        // A guardian pause must outlast the governance delay so governance can always answer it.
+        require(oracle.guardianPause() >= timelock.delay(), "guardian pause shorter than delay");
     }
 }

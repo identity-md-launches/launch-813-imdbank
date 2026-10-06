@@ -28,10 +28,19 @@ contract RiskControlsTest is BankFixture {
         assertEq(badDebt, 2500e6 - paid);
         assertTrue(frozen);
         assertTrue(bank.frozen());
-        vm.expectRevert();
+        assertTrue(bank.lossHalted(address(usdc)));
+        vm.expectRevert(IMDBank.OutstandingBadDebt.selector);
+        bank.setFrozen(false);
+        vm.expectRevert(IMDBank.OutstandingBadDebt.selector);
+        bank.setReserveFrozen(address(usdc), false);
+        // Partial recapitalization does not lift the halt; the recorded loss must be covered in full.
+        vm.prank(LIQUIDATOR);
+        bank.coverBadDebt(address(usdc), badDebt - 1);
+        vm.expectRevert(IMDBank.OutstandingBadDebt.selector);
         bank.setFrozen(false);
         vm.prank(LIQUIDATOR);
-        bank.coverBadDebt(address(usdc), badDebt);
+        bank.coverBadDebt(address(usdc), 1);
+        assertFalse(bank.lossHalted(address(usdc)));
         bank.setReserveFrozen(address(usdc), false);
         bank.setFrozen(false);
         assertFalse(bank.frozen());

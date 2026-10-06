@@ -25,6 +25,12 @@ contract IMDBank {
     uint256 public constant MAX_INDEX = 1e36;
     uint256 public constant MAX_PRICE = 1e27;
     uint256 public constant LIQUIDATION_DUST_USD = 1e15;
+    /// @notice Smallest debt per account and reserve a borrow may leave, so one-share positions whose
+    /// rounded debt doubles on first accrual and that no liquidation path can clear cannot be opened.
+    uint256 public constant MIN_DEBT_USD = 1e18;
+    /// @notice Recorded loss per reserve above which lending halts until recapitalized. Smaller dust
+    /// losses are recorded and visible but cannot be used to stop the whole bank.
+    uint256 public constant LOSS_FREEZE_USD = 1e18;
 
     address public immutable governor;
     address public guardian;
@@ -57,6 +63,7 @@ contract IMDBank {
         uint256 kinkBps;
         uint256 cachedRateRay;
         bool frozen;
+        bool lossHalt;
     }
     mapping(address => Reserve) private reserves;
 
@@ -85,6 +92,7 @@ contract IMDBank {
     error Expired();
     error Slippage();
     error OutstandingBadDebt();
+    error MinimumDebt();
 
     event Supplied(address indexed payer, address indexed account, uint256 amount);
     event CollateralChanged(address indexed account, bool enabled);
@@ -164,7 +172,8 @@ contract IMDBank {
                 slope2Ray: RAY * 90 / 100,
                 kinkBps: 8000,
                 cachedRateRay: RAY / 50,
-                frozen: false
+                frozen: false,
+                lossHalt: false
             });
         }
     }
@@ -204,7 +213,7 @@ contract IMDBank {
         Reserve storage reserve = _reserve(asset);
         _amount(amount);
         _recipient(to);
-        if (frozen || reserve.frozen || reserve.badDebt != 0) revert Frozen();
+        if (frozen || reserve.frozen) revert Frozen();
         _accrueAll();
         if (reserve.index == MAX_INDEX) revert Frozen();
         if (ExactToken.balance(asset, address(this)) < amount) revert InsufficientLiquidity();
@@ -213,6 +222,9 @@ contract IMDBank {
         debtShares[msg.sender][asset] += shares;
         if (_debt(reserve.totalDebtShares, reserve.index) > reserve.borrowCap) revert CapExceeded();
         _requireBorrowSafe(msg.sender);
+        if (_debtValue(asset, _debt(debtShares[msg.sender][asset], reserve.index)) < MIN_DEBT_USD) {
+            revert MinimumDebt();
+        }
         asset.push(to, amount);
         _updateRate(asset, reserve);
         emit Borrowed(msg.sender, asset, to, amount, shares);
@@ -252,6 +264,7 @@ contract IMDBank {
         if (amount > reserve.badDebt) revert InvalidAmount();
         _accrue(asset, reserve);
         reserve.badDebt -= amount;
+        if (reserve.badDebt == 0) reserve.lossHalt = false;
         asset.pull(msg.sender, amount);
         _updateRate(asset, reserve);
         emit BadDebtCovered(msg.sender, asset, amount);
@@ -373,6 +386,11 @@ contract IMDBank {
         );
     }
 
+    /// @notice True while a recorded loss above `LOSS_FREEZE_USD` keeps the reserve and bank halted.
+    function lossHalted(address asset) external view returns (bool) {
+        return _reserve(asset).lossHalt;
+    }
+
     function configureRisk(
         uint256 ltv,
         uint256 threshold,
@@ -420,7 +438,7 @@ contract IMDBank {
         _freezeAuthority(value);
         if (!value) {
             for (uint256 i; i < 3; ++i) {
-                if (reserves[assets[i]].badDebt != 0) revert OutstandingBadDebt();
+                if (reserves[assets[i]].lossHalt) revert OutstandingBadDebt();
             }
         }
         frozen = value;
@@ -430,7 +448,7 @@ contract IMDBank {
     function setReserveFrozen(address asset, bool value) external nonReentrant {
         _freezeAuthority(value);
         Reserve storage reserve = _reserve(asset);
-        if (!value && reserve.badDebt != 0) revert OutstandingBadDebt();
+        if (!value && reserve.lossHalt) revert OutstandingBadDebt();
         reserve.frozen = value;
         emit FrozenStateChanged(asset, value);
     }
@@ -473,8 +491,9 @@ contract IMDBank {
         uint256 seizedValue =
             Math.mulDiv(Math.mulDiv(paid, quote.debtPrice, assetUnit[asset]), BPS + liquidationBonusBps, BPS);
         seized = Math.min(quote.available, Math.mulDiv(seizedValue, collateralUnit, quote.collateralPrice));
+        // A collateral-limited payment buys the whole position, including residue that floors to zero.
         if (
-            quote.budget == quote.coveredAmount && seized != 0
+            quote.budget == quote.coveredAmount
                 && Math.mulDiv(
                         quote.available - seized, quote.collateralPrice, collateralUnit, Math.Rounding.Ceil
                     ) <= LIQUIDATION_DUST_USD
@@ -506,13 +525,22 @@ contract IMDBank {
             uint256 amount = _debt(shares, reserve.index);
             _burnDebt(account, asset, reserve, shares);
             reserve.badDebt += amount;
-            reserve.frozen = true;
-            frozen = true;
             _updateRate(asset, reserve);
             emit BadDebtRecorded(account, asset, amount);
-            emit FrozenStateChanged(asset, true);
-            emit FrozenStateChanged(address(0), true);
+            // Dust losses stay recorded and coverable without halting; material losses halt lending
+            // in the reserve and the bank until fully recapitalized and reviewed by governance.
+            if (!reserve.lossHalt && _debtValue(asset, reserve.badDebt) > LOSS_FREEZE_USD) {
+                reserve.lossHalt = true;
+                reserve.frozen = true;
+                frozen = true;
+                emit FrozenStateChanged(asset, true);
+                emit FrozenStateChanged(address(0), true);
+            }
         }
+    }
+
+    function _debtValue(address asset, uint256 amount) private view returns (uint256) {
+        return Math.mulDiv(amount, _price(asset), assetUnit[asset], Math.Rounding.Ceil);
     }
 
     function _repayQuote(uint256 shares, uint256 index, uint256 budget)

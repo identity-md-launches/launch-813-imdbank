@@ -239,7 +239,7 @@ contract IMDBankTest is BankFixture {
     }
 
     function testFuzz_borrowRepayRoundingCannotCreateAssets(uint64 amountRaw, uint32 timeRaw) public {
-        uint256 amount = bound(uint256(amountRaw), 100, 2500e6);
+        uint256 amount = bound(uint256(amountRaw), 1e6, 2500e6);
         uint256 elapsed = bound(uint256(timeRaw), 1, 365 days);
         _position(ALICE, 1000e18, amount);
         vm.warp(block.timestamp + elapsed);

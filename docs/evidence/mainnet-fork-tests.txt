@@ -1,11 +1,11 @@
-Compiling 28 files with Solc 0.8.26
-Solc 0.8.26 finished in 1.98s
+Compiling 1 files with Solc 0.8.26
+Solc 0.8.26 finished in 1.30s
 Compiler run successful!
 
 Ran 3 tests for test-fork/Mainnet.t.sol:MainnetIntegrationTest
-[PASS] test_actualAssetsFullLifecycleAndUnsafeRejection() (gas: 1704546)
-[PASS] test_oracleShockLiquidationAndBadDebtAccounting() (gas: 986241)
+[PASS] test_actualAssetsFullLifecycleAndUnsafeRejection() (gas: 1705757)
+[PASS] test_oracleShockLiquidationAndBadDebtAccounting() (gas: 989610)
 [PASS] test_realChainlinkRoundSanityAtPinnedBlock() (gas: 104524)
-Suite result: ok. 3 passed; 0 failed; 0 skipped; finished in 6.25s (3.32s CPU time)
+Suite result: ok. 3 passed; 0 failed; 0 skipped; finished in 6.41s (3.31s CPU time)
 
-Ran 1 test suite in 6.82s (6.25s CPU time): 3 tests passed, 0 failed, 0 skipped (3 total tests)
+Ran 1 test suite in 6.94s (6.41s CPU time): 3 tests passed, 0 failed, 0 skipped (3 total tests)
